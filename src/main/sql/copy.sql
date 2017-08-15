@@ -1,0 +1,1 @@
+insert into public.share_note(idid, creation_date, modification_date, nick_name, text) values('12121212121212121212121','2017-07-31 10:37:04.602088','2017-07-31 10:37:04.602088','Enosh~Huang','good day')
