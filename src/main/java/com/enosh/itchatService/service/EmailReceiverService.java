@@ -219,7 +219,7 @@ public class EmailReceiverService {
 //		receiver.setPort("143");
 //		
 //		receiver.setUserName("huangcunwei0701@sina.com");
-//		receiver.setPassword("aishirennai520");
+//		receiver.setPassword("");
         
    }
 }
