@@ -19,17 +19,17 @@ public class DataInit {
 	@Autowired JdbcTemplate jdbcTemplate;
 	@Autowired ShareNoteService shareNoteService;
 	
-	@PostConstruct
-	public void init() {
-		List<Map<String, Object>> rows = jdbcTemplate.queryForList("select * from public.note");
-		for (Map<String, Object> map : rows) {
-			ShareNote note = new ShareNote();
-			note.setNickName((String)map.get("user_name"));
-			note.setText((String)map.get("note"));
-			Date date = (Date)map.get("creation_time");
-			note.setCreationDate(date);
-			note.setModificationDate(date);
-			shareNoteService.save(note);
-		}
-	}
+//	@PostConstruct
+//	public void init() {
+//		List<Map<String, Object>> rows = jdbcTemplate.queryForList("select * from public.note");
+//		for (Map<String, Object> map : rows) {
+//			ShareNote note = new ShareNote();
+//			note.setNickName((String)map.get("user_name"));
+//			note.setText((String)map.get("note"));
+//			Date date = (Date)map.get("creation_time");
+//			note.setCreationDate(date);
+//			note.setModificationDate(date);
+//			shareNoteService.save(note);
+//		}
+//	}
 }
