@@ -2,6 +2,7 @@ package com.enosh.itchatService.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class ShareNote extends AbsEntity{
@@ -10,6 +11,9 @@ public class ShareNote extends AbsEntity{
 
 	@Column(columnDefinition="Text")
 	private String text;
+	
+	@ManyToOne
+	private User user;
 	
 	private String nickName;
 
@@ -27,5 +31,14 @@ public class ShareNote extends AbsEntity{
 
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}	
+	
 }

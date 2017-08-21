@@ -13,38 +13,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.enosh.itchatService.service.FinanceOfBroService;
 import com.enosh.itchatService.service.ItextService;
 import com.enosh.itchatService.service.ShareNoteService;
+import com.enosh.itchatService.service.UserService;
 
 @RestController
 public class ItchatController {
 	
 	@Autowired private ShareNoteService shareNoteService;
-	@Autowired private FinanceOfBroService financeOfBroService;
 	@Autowired private ItextService itextService;
+	@Autowired private UserService userService;
 	
 	@RequestMapping("/save")
     public String saveText(@RequestParam(required=true)String text, 
     		@RequestParam(required=true) String nickName,
     		@RequestParam(required=false) String date) {
-		shareNoteService.createShareNote(text, nickName, date);
+		shareNoteService.createShareNote(text, nickName, date, null);
         return "Save note successfully !";    
-    }
-	
-	@RequestMapping("/updateFinance")
-    public String updateFinance(@RequestParam(required=true)int remain, 
-    		@RequestParam(required=true)int lastRemain,
-    		@RequestParam(required=true)String name,
-    		@RequestParam(required=true)String description) {
-		
-		financeOfBroService.createNew(remain, lastRemain, name, description);
-        return "Save finance successfully !";    
-    }
-	
-	@RequestMapping("/getLatestFinance")
-    public String getLatestFinance() {
-        return financeOfBroService.getLatestFinanceJson();    
     }
 	
 	@RequestMapping("/generatePdf")
@@ -60,5 +45,12 @@ public class ItchatController {
 		FileSystemResource fileSystemResource = new FileSystemResource(file);
 		
         return new ResponseEntity<Resource>(fileSystemResource, headers, HttpStatus.OK);
+    }
+	
+	@RequestMapping("/createUser")
+    public String createUser(@RequestParam(required = true)String userName, 
+    		@RequestParam(required = false)String email) {
+		
+		return userService.createUser(userName, email);
     }
 }

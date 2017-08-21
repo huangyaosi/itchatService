@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
 import com.enosh.itchatService.utils.StringUtils;
 
@@ -35,6 +36,7 @@ import com.enosh.itchatService.utils.StringUtils;
 @Service
 public class EmailReceiverService {
 	@Autowired ShareNoteService shareNoteService;
+	@Autowired UserService userService;
 	
 	@Value("${mail.receiver.protocol}")
 	private String protocol;
@@ -54,9 +56,13 @@ public class EmailReceiverService {
 	@Value("${mail.receiver.keyword}")
 	private String keyword;
 	
+	@Value("${admin.email}")
+	private String adminEmail;
+	
 	public static final Pattern EMAIL_PATTERN_1 = Pattern.compile("\\<(.*@.*)\\>");
 	
-	@Scheduled(cron = "0 0 */1 * * *")
+//	@Scheduled(cron = "0 0 */1 * * *")
+	@Scheduled(cron = "*/40 * * * * *")
 	public void seeNewEmails() {
 		System.out.println("start search new email..");
 		Properties properties = new Properties();
@@ -80,44 +86,61 @@ public class EmailReceiverService {
 			for (int i = 0; i < messages.length; i++) {
 				Message msg = messages[i];
 				String subject = msg.getSubject();
-				if (!StringUtils.isEmpty(subject) && subject.indexOf(getKeyword()) > -1) {
-					Address[] fromAddress = msg.getFrom();
-					String from = getFromUserName(fromAddress[0].toString());
-					Date sentDate = msg.getSentDate() == null ? new Date() : msg.getSentDate();
-					String messageContent = "";
-					String[] arr = subject.split(":");
+				Address[] fromAddress = msg.getFrom();
+				String from = getFromUserName(fromAddress[0].toString());
+				String name = "";
+				Date sentDate = msg.getSentDate() == null ? new Date() : msg.getSentDate();
+				String messageContent = "";
+				if(!StringUtils.isEmpty(subject) && subject.startsWith(getKeyword())) {
+					String splitStr = "";
+					if(subject.indexOf("：") > -1){
+						splitStr = "：";
+					} else {
+						splitStr = ":";
+					}
+					String[] arr = subject.split(splitStr);
 					if (arr.length >= 2) {
-						from = arr[1];
+						name = arr[1];
 						if (arr.length == 3) {
 							sentDate = DateTimeUtils.toDate((arr[2]), DateTimeUtils.DATE_MASK);
 						}
 					}
-					if (msg.isMimeType("text/plain") || msg.isMimeType("text/html")) {
-						try {
-							Object content = msg.getContent();
-							if (content != null) {
-								messageContent = content.toString();
-							}
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					} else if (msg.isMimeType("multipart/*")) {
-						try {
-							MimeMultipart mimeMultipart = (MimeMultipart) msg.getContent();
-							messageContent = getTextFromMimeMultipart(mimeMultipart);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-
-					// print out details of each message
-					System.out.println("Message #" + (i + 1) + ":");
-					System.out.println("\t From: " + from);
-					System.out.println("\t Sent Date: " + DateTimeUtils.toStr(sentDate));
-					System.out.println("\t Message: " + messageContent);
-
-					shareNoteService.createShareNoteFromMail(messageContent, from, sentDate);
 				}
+				
+				User user = null;
+				
+				if(adminEmail.equals(from)) {
+					if(!StringUtils.isEmpty(name)) user = userService.findOrCreateUserByName(name);
+				} else {
+					user = userService.findByEmailOrName(from, name);
+				}
+				
+				if(user == null) continue;
+				
+				if (msg.isMimeType("text/plain") || msg.isMimeType("text/html")) {
+					try {
+						Object content = msg.getContent();
+						if (content != null) {
+							messageContent = content.toString();
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				} else if (msg.isMimeType("multipart/*")) {
+					try {
+						MimeMultipart mimeMultipart = (MimeMultipart) msg.getContent();
+						messageContent = getTextFromMimeMultipart(mimeMultipart);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				// print out details of each message
+				System.out.println("Message #" + (i + 1) + ":");
+				System.out.println("\t From: " + from);
+				System.out.println("\t Sent Date: " + DateTimeUtils.toStr(sentDate));
+				System.out.println("\t Message: " + messageContent);
+				shareNoteService.createShareNoteFromMail(messageContent, sentDate, user);
 
 			}
 			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
@@ -206,6 +229,14 @@ public class EmailReceiverService {
 		this.keyword = keyword;
 	}
 
+	public String getAdminEmail() {
+		return adminEmail;
+	}
+
+	public void setAdminEmail(String adminEmail) {
+		this.adminEmail = adminEmail;
+	}
+
 	public static void main(String[] args) {
        // for POP3
        //String protocol = "pop3";
@@ -220,6 +251,11 @@ public class EmailReceiverService {
 //		
 //		receiver.setUserName("huangcunwei0701@sina.com");
 //		receiver.setPassword("ai");
-        
+        String str = "灵修：高雄";
+        System.out.println(str.indexOf("："));
+        String arr[] = str.split("：");
+        for (int i = 0; i < arr.length; i++) {
+			System.out.println(arr[i]);
+		}
    }
 }

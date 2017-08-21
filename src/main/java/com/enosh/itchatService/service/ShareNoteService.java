@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.enosh.itchatService.dao.ShareNoteRepository;
 import com.enosh.itchatService.model.ShareNote;
+import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
 import com.enosh.itchatService.utils.StringUtils;
 import com.itextpdf.text.DocumentException;
@@ -33,21 +34,21 @@ public class ShareNoteService extends AbsService<ShareNote>{
 		return shareNoteRepository;
 	}
 	
-	public void createShareNote(String text, String nickName, String dateStr) {
+	public void createShareNote(String text, String nickName, String dateStr, User user) {
 		Date date = !StringUtils.isEmpty(dateStr) ? DateTimeUtils.toDate(dateStr) : new Date();
 		
-		saveNote(text, nickName, date);
+		saveNote(text, date, user);
 	}
 	
-	public void createShareNoteFromMail(String text, String nickName, Date date) {
+	public void createShareNoteFromMail(String text, Date date, User user) {
 		
-		if(StringUtils.isEmpty(text) || StringUtils.isEmpty(nickName) || date == null) return;
+		if(StringUtils.isEmpty(text) || user == null || date == null) return;
 		
-		saveNote(text, nickName, date);
+		saveNote(text, date, user);
 	}
 	
-	private void saveNote(String text, String nickName, Date date) {
-		List<ShareNote> shareNotes = getDAO().findByNickNameAndDate(nickName, DateTimeUtils.toStr(date));
+	private void saveNote(String text, Date date, User user) {
+		List<ShareNote> shareNotes = getDAO().findByNickNameAndDate(user.getUsername(), DateTimeUtils.toStr(date));
 		boolean alreadyExist = false;
 		text = text.trim();
 		for (ShareNote shareNote : shareNotes) {
@@ -62,11 +63,12 @@ public class ShareNoteService extends AbsService<ShareNote>{
 		}
 		if(!alreadyExist) {
 			ShareNote shareNote = new ShareNote();
-			shareNote.setNickName(nickName);
+			shareNote.setNickName(user.getUsername());
 			shareNote.setText(text);
 			shareNote.setCreationDate(new Date());
 			
 			shareNote.setModificationDate(date);
+			shareNote.setUser(user);
 			save(shareNote);
 		}
 	}
