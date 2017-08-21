@@ -45,7 +45,11 @@ public class UserService extends AbsService<User>{
 			user = new User(userName);
 			user.addEmail(email);
 			save(user);
+		} else if(!StringUtils.isEmpty(email)) {
+			user.addEmail(email);
+			save(user);
 		}
+		
 		return "Create user successfully for " + userName;
 	}
 }
