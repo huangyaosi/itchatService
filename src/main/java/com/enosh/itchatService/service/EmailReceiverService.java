@@ -61,8 +61,8 @@ public class EmailReceiverService {
 	
 	public static final Pattern EMAIL_PATTERN_1 = Pattern.compile("\\<(.*@.*)\\>");
 	
-	@Scheduled(cron = "0 0 */1 * * *")
-//	@Scheduled(cron = "*/40 * * * * *")
+//	@Scheduled(cron = "0 0 */1 * * *")
+	@Scheduled(cron = "*/40 * * * * *")
 	public void seeNewEmails() {
 		System.out.println("start search new email..");
 		Properties properties = new Properties();
@@ -143,7 +143,7 @@ public class EmailReceiverService {
 				shareNoteService.createShareNoteFromMail(messageContent, sentDate, user);
 
 			}
-			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+//			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			// disconnect
 			folderInbox.close(false);
 			store.close();
