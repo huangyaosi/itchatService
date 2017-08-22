@@ -61,8 +61,8 @@ public class EmailReceiverService {
 	
 	public static final Pattern EMAIL_PATTERN_1 = Pattern.compile("\\<(.*@.*)\\>");
 	
-//	@Scheduled(cron = "0 0 */1 * * *")
-	@Scheduled(cron = "*/40 * * * * *")
+	@Scheduled(cron = "0 0 */1 * * *")
+//	@Scheduled(cron = "*/40 * * * * *")
 	public void seeNewEmails() {
 		System.out.println("start search new email..");
 		Properties properties = new Properties();
@@ -109,8 +109,12 @@ public class EmailReceiverService {
 				
 				User user = null;
 				
-				if(adminEmail.equals(from)) {
-					if(!StringUtils.isEmpty(name)) user = userService.findOrCreateUserByName(name);
+				if(adminEmail.trim().equals(from.trim())) {
+					if(!StringUtils.isEmpty(name)) {
+						user = userService.findOrCreateUserByName(name);
+					} else {
+						user = userService.findByEmailOrName(from, name);
+					}
 				} else {
 					user = userService.findByEmailOrName(from, name);
 				}
