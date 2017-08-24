@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.enosh.itchatService.config.MailSenderConfig;
 import com.enosh.itchatService.config.PdfConfig;
 import com.enosh.itchatService.model.ShareNote;
+import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chapter;
@@ -25,16 +29,27 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.DottedLineSeparator;
 
+import freemarker.template.Configuration;
+
 @Service
 public class ItextService {
     
     @Autowired ShareNoteService shareNoteService;
     @Autowired PdfConfig pdfConfig;
+    @Autowired UserService userService;
+    @Autowired MailSenderService mailSenderService;
+    @Autowired MailSenderConfig mailSenderConfig;
     
-    public File createPdf(String nickName, String month) {
-    	List<ShareNote> shareNotes = shareNoteService.findByNickName(nickName, month);
+    public File createPdf(String nickName, String fromMonth, String toMonth) {
+    	List<ShareNote> shareNotes = shareNoteService.findByNickNameAndMonth(nickName, fromMonth, toMonth);
     	if(shareNotes == null || shareNotes.size() <=0) return null;
-    	String dir = pdfConfig.getDirectoryPath() + DateTimeUtils.toStr(new Date()) + "_" + nickName + ".pdf";
+		String monthStr = "";
+		if (fromMonth.trim().equals(toMonth.trim())) {
+			monthStr = fromMonth;
+		} else {
+			monthStr = fromMonth + " - " + toMonth;
+		}
+    	String dir = pdfConfig.getDirectoryPath() + monthStr + "_" + nickName + ".pdf";
     	File file = new File(dir);
         file.getParentFile().mkdirs();
         Document document = new Document();
@@ -42,7 +57,6 @@ public class ItextService {
 			PdfWriter.getInstance(document, new FileOutputStream(dir));
 			document.open();
 	        BaseFont bf;
-//	        String path = new File(".").getCanonicalPath();
 	        bf = BaseFont.createFont(pdfConfig.getFrontPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
 	        Font titleFont = new Font(bf, 20f, Font.NORMAL);
 	        Font dateFont = new Font(bf, 8f, Font.BOLDITALIC);
@@ -55,7 +69,7 @@ public class ItextService {
 	        Chunk linebreak = new Chunk(separator);
 	        
 	        //title
-	        String title = pdfConfig.getShareNoteTitle() + "(" + month + " " + nickName + ")";
+	        String title = pdfConfig.getShareNoteTitle() + "(" + monthStr + " " + nickName + ")";
 	        Paragraph titleParagrah = new Paragraph(title, titleFont);
 	        titleParagrah.setAlignment(Paragraph.ALIGN_CENTER);
 	        Chapter chapter = new Chapter(titleParagrah, 1);
@@ -82,7 +96,27 @@ public class ItextService {
 			e.printStackTrace();
 		}
 		return file;
-  
+    }
+    
+    public File createPdf(User user, String fromMonth, String toMonth) {
+    	return createPdf(user.getUsername(), fromMonth, toMonth);
+    }
+    
+    public void batchCreatePdf() {
+    	Iterable<User> users = userService.getDAO().findAll();
+    	List<User> userList = new ArrayList<User>();
+    	for (User user : users) {
+			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
+		}
+    	String month = DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_MASK);
+    	for (User user : userList) {
+    		File file = createPdf(user, month, month);
+    		if(file != null && file.exists() && "huangcunwei0701@sina.com".equals(user.getPrimaryEmail())) {
+    			String content = "";
+    			String subject = user.getUsername() + " " + month + mailSenderConfig.getSubjectPdf();
+    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
+    		}
+		}
     }
     
     class CustomDashedLineSeparator extends DottedLineSeparator {

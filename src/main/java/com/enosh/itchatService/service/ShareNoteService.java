@@ -21,8 +21,8 @@ public class ShareNoteService extends AbsService<ShareNote>{
 
 	@Autowired private ShareNoteRepository shareNoteRepository;
 	
-	public List<ShareNote> findByNickName(String nickName, String month) {
-		return shareNoteRepository.findByNickNameAndMonth(nickName, month);
+	public List<ShareNote> findByNickNameAndMonth(String nickName, String fromMonth, String toMonth) {
+		return shareNoteRepository.findByNickNameAndMonth(nickName, fromMonth, toMonth);
 	}
 
 	public List<ShareNote> findByNickNameAndDate(String nickName, String date) {

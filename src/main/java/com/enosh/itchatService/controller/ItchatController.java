@@ -34,9 +34,10 @@ public class ItchatController {
 	
 	@RequestMapping("/generatePdf")
     public ResponseEntity<Resource> generatePdf(@RequestParam(required = true)String nickName, 
-    		@RequestParam(required = true)String month) {
+    		@RequestParam(required = true)String fromMonth,
+    		@RequestParam(required = true)String toMonth) {
 		
-        File file = itextService.createPdf(nickName, month);
+        File file = itextService.createPdf(nickName, fromMonth, toMonth);
         if(file == null) return null;
         
         HttpHeaders headers = new HttpHeaders();

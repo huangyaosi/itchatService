@@ -5,5 +5,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
 public interface AbsRepository<T> extends CrudRepository<T, String>{
-	
+
 }

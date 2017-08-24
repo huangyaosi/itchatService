@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.enosh.itchatService.model.ShareNote;
 import com.enosh.itchatService.service.ShareNoteService;
 
+import freemarker.template.Configuration;
+
 @Component("dataInit")
 public class DataInit {
 	

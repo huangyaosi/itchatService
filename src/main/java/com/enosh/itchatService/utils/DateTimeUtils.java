@@ -36,6 +36,12 @@ public class DateTimeUtils {
 		return format.format(date);
 	}
 	
+	public static String toStr(Date date, String mask) {
+		if(date == null) return "";
+		SimpleDateFormat format = new SimpleDateFormat(mask);
+		return format.format(date);
+	}
+	
 	public static void main(String args[]) {
 		System.out.println(toStr(new Date(0)));
 	}

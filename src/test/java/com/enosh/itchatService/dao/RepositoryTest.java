@@ -12,9 +12,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.enosh.itchatService.model.Note;
+import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.ShareNote;
 import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
@@ -28,6 +28,7 @@ public class RepositoryTest {
 	
 	@Autowired private ShareNoteRepository shareNoteRepository;
 	@Autowired private UserRepository userRepository;
+	@Autowired private NoteRepository noteRepository;
 	
 	@Test
     public void testshareNoteRepository() throws Exception {
@@ -66,5 +67,39 @@ public class RepositoryTest {
 		Assertions.assertThat(u2.getPrimaryEmail()).isEqualTo(email1);
 		Assertions.assertThat(u3).isNotNull();
 		Assertions.assertThat(u3.getOtherEmails()).isEqualTo(email2);
+	}
+	
+	@Test
+    public void testNoteRepository() throws Exception {
+		String name = "Enosh";
+		String email1 = "hcw123@sina.com";
+		String email2 = "hcw124@sina.com";
+		User user = new User(name);
+		user.addEmail(email1);
+		user.addEmail(email2);
+		this.entityManager.persist(user);
+		
+		String tag = "世界因你而不同";
+		String alias= "sj";
+		NoteType noteType = new NoteType();
+		noteType.setUser(user);
+		noteType.setTag(tag);
+		noteType.setAlias(alias);
+		this.entityManager.persist(noteType);
+		
+		String text = "You are good at what you love.";
+		Note note = new Note();
+		note.setUser(user);
+		note.setCreationDate(new Date());
+		note.setModificationDate(new Date());
+		note.setNoteType(noteType);
+		note.setText(text);
+		this.entityManager.persist(note);
+		this.entityManager.flush();
+		
+		noteRepository.findByCreationDate(user, DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_MASK));
+		List<Note> usetNotes = noteRepository.findByUser(user);
+		Assertions.assertThat(usetNotes.get(0).getText()).isEqualTo(text);
+		Assertions.assertThat(usetNotes.get(0).getNoteType().getTag()).isEqualTo(tag);
 	}
 }
