@@ -1,0 +1,43 @@
+package com.enosh.itchatService.service;
+
+import java.io.File;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import com.enosh.itchatService.config.MailSenderConfig;
+
+@Service
+public class MailSenderServiceImpl implements MailSenderService{
+
+	@Autowired
+    private JavaMailSender mailSender;
+
+	@Autowired MailSenderConfig mailSenderConfig;
+    
+	@Override
+	public void sendEmailWithAttachment(String to, String subject, String content, File file) {
+		MimeMessage message = mailSender.createMimeMessage();
+		try {
+	        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	        helper.setFrom(mailSenderConfig.getFromPdf());
+	        helper.setTo(to);
+	        helper.setSubject(subject);
+	        helper.setText(content);
+
+	        FileSystemResource fileRes = new FileSystemResource(file);
+	        String fileName = file.getName();
+	        helper.addAttachment(fileName, fileRes);
+	        mailSender.send(message);
+	    } catch (MessagingException e) {
+	    	
+	    }
+	}
+
+}
