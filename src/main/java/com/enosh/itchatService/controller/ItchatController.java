@@ -54,4 +54,19 @@ public class ItchatController {
 		
 		return userService.createUser(userName, email);
     }
+	
+	@RequestMapping("/getBookNote")
+	public ResponseEntity<Resource> getBookNote(@RequestParam(required = true)String userName, 
+    		@RequestParam(required = true)String bookTagOrAlias) {
+		
+		File file = itextService.createPdfForNote(userName, bookTagOrAlias, null);
+		if(file == null) return null;
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PDF);
+		headers.set("Content-disposition", "attachment; filename=" + file.getName());
+		FileSystemResource fileSystemResource = new FileSystemResource(file);
+		
+        return new ResponseEntity<Resource>(fileSystemResource, headers, HttpStatus.OK);
+	}
 }

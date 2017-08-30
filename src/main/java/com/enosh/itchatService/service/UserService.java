@@ -17,6 +17,10 @@ public class UserService extends AbsService<User>{
 		return userRepository;
 	}
 
+	public User findByUsername(String username) {
+		return getDAO().findByUsername(username);
+	}
+	
 	public User findByEmailOrName(String email, String name) {
 		User user = getDAO().findByEmail(email, email);
 		if(user == null && !StringUtils.isEmpty(name)) {

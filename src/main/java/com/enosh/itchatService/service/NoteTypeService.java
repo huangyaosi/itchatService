@@ -32,4 +32,8 @@ public class NoteTypeService extends AbsService<NoteType>{
 	public NoteType findByTagOrAlias(User user, String tag, String alias) {
 		return getDAO().findByTagOrAlias(user, tag, alias);
 	}
+	
+	public NoteType findByUserAndEqTagOrAlias(User user, String tagOrAlias) {
+		return getDAO().findByUserAndEqTagOrAlias(user, tagOrAlias);
+	}
 }

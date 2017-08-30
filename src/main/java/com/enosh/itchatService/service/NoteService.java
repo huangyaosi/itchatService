@@ -46,4 +46,8 @@ public class NoteService extends AbsService<Note>{
 		note.setText(text);
 		save(note);
 	}
+	
+	public List<Note> findByUserAndNoteType(User user, NoteType noteType) {
+		return getDAO().findByUserAndNoteTypeOrderByCreationDate(user, noteType);
+	}
 }

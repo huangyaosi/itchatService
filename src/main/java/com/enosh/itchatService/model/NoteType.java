@@ -3,6 +3,8 @@ package com.enosh.itchatService.model;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 public class NoteType extends AbsEntity{
 	
@@ -14,6 +16,9 @@ public class NoteType extends AbsEntity{
 	private String alias;
 	
 	private String description;
+	
+	@Type(type = "true_false")
+	private boolean completed;
 
 	public User getUser() {
 		return user;
@@ -46,5 +51,12 @@ public class NoteType extends AbsEntity{
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
+	public boolean isCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
+	}
 }

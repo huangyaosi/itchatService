@@ -16,6 +16,8 @@ public interface NoteRepository extends AbsRepository<Note>{
 	
 	public List<Note> findByUser(User user);
 	
+	public List<Note> findByUserAndNoteTypeOrderByCreationDate(User user, NoteType noteType);
+	
 	@Query("select n from Note n where n.user =?1 and to_char(n.creationDate, 'YYYYMMDD')=?2")
 	public List<Note> findByCreationDate(User user, String creationDate);
 	

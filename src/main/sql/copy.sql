@@ -6,3 +6,6 @@ from (
 	select u.id as user_id, sn.nick_name as nick_name from public.share_note sn, public.users u where sn.nick_name = u.username
 ) U
 where s.nick_name = U.nick_name;
+
+alter table public.note_type add column completed char(1);
+update public.note_type set completed='F';
