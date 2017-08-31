@@ -59,8 +59,8 @@ public class RepositoryTest {
 		entityManager.flush();
 		
 		User u1 = userRepository.findByUsername(name);
-		User u2 = userRepository.findByEmail(email1, email1);
-		User u3 = userRepository.findByEmail(email2, email2);
+		User u2 = userRepository.findByEmail(email1);
+		User u3 = userRepository.findByEmail(email2);
 		Assertions.assertThat(u1).isNotNull();
 		Assertions.assertThat(u1.getUsername()).isEqualTo(name);
 		Assertions.assertThat(u2).isNotNull();

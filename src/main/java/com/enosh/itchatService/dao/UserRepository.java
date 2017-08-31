@@ -8,6 +8,6 @@ public interface UserRepository extends AbsRepository<User>{
 	
 	public User findByUsername(String username);
 	
-	@Query("select u from User u where u.primaryEmail=?1 or u.otherEmails like ?2")
-	public User findByEmail(String email, String otherEmails);
+	@Query("select u from User u where u.primaryEmail=?1 or u.otherEmails like ?1")
+	public User findByEmail(String email);
 }

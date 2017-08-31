@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.enosh.itchatService.dao.NoteRepository;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.Note;
 import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.User;
@@ -17,12 +18,21 @@ import com.enosh.itchatService.utils.StringUtils;
 public class NoteService extends AbsService<Note>{
 
 	@Autowired NoteRepository noteRepository;
+	@Autowired NoteTypeService noteTypeService;
+	@Autowired UserService userService;
 	
 	@Override
 	public NoteRepository getDAO() {
 		return noteRepository;
 	}
 
+	public void createNote(String key) {
+		User user = ThreadLocalUtils.getCurrentUser();
+		NoteType noteType = noteTypeService.findByUserAndEqTagOrAlias(user, key);
+		String text = ThreadLocalUtils.getMailContent();
+		if(!StringUtils.isEmpty(text) && noteType != null) createNote(user, noteType, text);
+	}
+	
 	public void createNote(User user, NoteType noteType, String text) {
 		if(StringUtils.isEmpty(text)) return;
 		List<Note> notes = getDAO().findByCreationDate(user, DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_MASK));

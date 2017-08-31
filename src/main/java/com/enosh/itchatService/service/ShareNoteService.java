@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.enosh.itchatService.dao.ShareNoteRepository;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.ShareNote;
 import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
@@ -38,6 +39,13 @@ public class ShareNoteService extends AbsService<ShareNote>{
 		Date date = !StringUtils.isEmpty(dateStr) ? DateTimeUtils.toDate(dateStr) : new Date();
 		
 		saveNote(text, date, user);
+	}
+	
+	public void createShareNote() {
+		User user = ThreadLocalUtils.getCurrentUser();
+		Date sendDate = ThreadLocalUtils.getSendDate();
+		String text = ThreadLocalUtils.getMailContent();
+		if(!StringUtils.isEmpty(text)) saveNote(text, sendDate, user);
 	}
 	
 	public void createShareNoteFromMail(String text, Date date, User user) {

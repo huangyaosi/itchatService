@@ -109,10 +109,6 @@ public class ItextService {
     	return createPdf(user.getUsername(), fromMonth, toMonth);
     }
     
-    public void createPdfForNote() {
-
-	}
-    
     public File createPdfForNote(String userName, String bookTagOrAlias, Document document) {
     	User user = userService.findByUsername(userName);
     	if(user == null) return null;
@@ -209,6 +205,16 @@ public class ItextService {
 		}
     }
     
+//	@Scheduled(cron = "0 0 8 * * *")
+	public void createPdfForNote() {
+		Iterable<User> users = userService.getDAO().findAll();
+    	List<User> userList = new ArrayList<User>();
+    	for (User user : users) {
+    		List<NoteType> noteTypes = noteTypeService.findByUserAndCompletedAndGenereated(user, true, false);
+			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
+		}
+	}
+	
     class CustomDashedLineSeparator extends DottedLineSeparator {
         protected float dash = 5;
         protected float phase = 2.5f;

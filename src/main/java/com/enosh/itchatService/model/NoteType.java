@@ -19,6 +19,9 @@ public class NoteType extends AbsEntity{
 	
 	@Type(type = "true_false")
 	private boolean completed;
+	
+	@Type(type = "true_false")
+	private boolean genereated;
 
 	public User getUser() {
 		return user;
@@ -58,5 +61,13 @@ public class NoteType extends AbsEntity{
 
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
+	}
+
+	public boolean isGenereated() {
+		return genereated;
+	}
+
+	public void setGenereated(boolean genereated) {
+		this.genereated = genereated;
 	}
 }

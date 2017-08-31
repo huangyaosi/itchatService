@@ -25,7 +25,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.enosh.itchatService.config.MailReceiverConfig;
-import com.enosh.itchatService.model.NoteType;
+import com.enosh.itchatService.dispatcher.KeyToMethodDispatch;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
 import com.enosh.itchatService.utils.StringUtils;
@@ -38,18 +39,18 @@ import com.enosh.itchatService.utils.StringUtils;
 */
 @Service
 public class EmailReceiverService {
-	@Autowired ShareNoteService shareNoteService;
 	@Autowired UserService userService;
 	@Autowired MailReceiverConfig mailReceiverConfig;
-	@Autowired NoteTypeService noteTypeService;
-	@Autowired NoteService noteService;
+	@Autowired KeyToMethodDispatch dispacher;
 	
 	public static final Pattern EMAIL_PATTERN_1 = Pattern.compile("\\<(.*@.*)\\>");
+	public static final Pattern SUBJECT_PATTERN_1 = Pattern.compile("(.*)[:|：](.*)[:|：](.*)");
+	public static final Pattern SUBJECT_PATTERN_2 = Pattern.compile("(.*)[:|：](.*)");
 	
 	private Comparator dateComparator;
 	
-	@Scheduled(cron = "0 0 */1 * * *")
-//	@Scheduled(cron = "*/50 * * * * *")
+//	@Scheduled(cron = "0 0 */1 * * *")
+	@Scheduled(cron = "*/40 * * * * *")
 	public void pollNewEmails() {
 		System.out.println(DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_TIME_MASK) + "-------start search new email...");
 		Properties properties = new Properties();
@@ -70,72 +71,36 @@ public class EmailReceiverService {
 			// fetches new messages from server
 			// Message[] messages = folderInbox.getMessages();
 			Message[] messages = folderInbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-			if(dateComparator == null){
-				dateComparator = new Comparator<Message>() {
-					public int compare(Message o1, Message o2) {
-						try {
-							Date date1= o1.getSentDate();
-							Date date2= o2.getSentDate();
-							if(date1 != null && date2 != null) {
-								if(date1.before(date2)) return -1;
-							}
-							
-						} catch (MessagingException e) {
-							e.printStackTrace();
-						}
-						return 1;
-					}
-				};
-			}
-			Arrays.sort(messages, dateComparator);
+			
+			Arrays.sort(messages, getdateComparator());
 			for (int i = 0; i < messages.length; i++) {
 				Message msg = messages[i];
 				String subject = msg.getSubject();
 				Address[] fromAddress = msg.getFrom();
 				String from = getFromUserName(fromAddress[0].toString());
-				String name = "";
-				Date sentDate = msg.getSentDate() == null ? new Date() : msg.getSentDate();
-				String messageContent = getContent(msg);
-				String secondArg = "";
-				String thirdArg = "";
-				if(!StringUtils.isEmpty(subject)){
-					String splitStr = "";
-					if(subject.indexOf("：") > -1){
-						splitStr = "：";
-					} else {
-						splitStr = ":";
-					}
-					String[] arr = subject.split(splitStr);
-					
-					if(subject.startsWith(mailReceiverConfig.getSpiritualShareKeyword())) {
-						if (arr.length >= 2) {
-							name = arr[1];
-							if (arr.length == 3) {
-								sentDate = DateTimeUtils.toDate((arr[2]), DateTimeUtils.DATE_MASK);
-							}
-						}
-					} else if(subject.startsWith(mailReceiverConfig.getCreateTagKeyword())) {
-						secondArg = arr[1];
-						thirdArg = arr[2];
-						User user = getUser(from.trim(), null);
-						if(user == null) continue;
-						noteTypeService.createNoteType(user, secondArg, thirdArg, messageContent);
-						continue;
-					}
-				}
-				
-				User user = getUser(from.trim(), name);
+				User user = userService.findByEmail(from);
 				if(user == null) continue;
 				
-				if(!StringUtils.isEmpty(subject)) {
-					NoteType noteType = noteTypeService.findByTagOrAlias(user, subject, subject);
-					if(noteType != null) {
-						noteService.createNote(user, noteType, messageContent);
-						continue;
-					}
-				}
+				ThreadLocalUtils.init(user, msg.getSentDate(), getContent(msg));
 				
-				shareNoteService.createShareNoteFromMail(messageContent, sentDate, user);
+				String key = "";
+				Object[] args = null;
+				if(!StringUtils.isEmpty(subject)){
+					Matcher matcher = SUBJECT_PATTERN_1.matcher(subject);
+					if(matcher.find()) {
+						args = new Object[2];
+						key = matcher.group(1);
+						args[0] = matcher.group(2);
+						args[1] = matcher.group(3);
+					} else if((matcher = SUBJECT_PATTERN_2.matcher(subject)).find()) {
+						args = new Object[1];
+						key = matcher.group(1);
+						args[0] = matcher.group(2);
+					}
+				} else {
+					key = subject;
+				}
+				dispacher.dispatchRequest(key, args);
 
 			}
 //			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
@@ -151,18 +116,25 @@ public class EmailReceiverService {
 		}
 	}
 
-	private User getUser(String fromEmail, String name) {
-		User user = null;
-		if(mailReceiverConfig.getAdminEmail().trim().equals(fromEmail.trim())) {
-			if(!StringUtils.isEmpty(name)) {
-				user = userService.findOrCreateUserByName(name);
-			} else {
-				user = userService.findByEmailOrName(fromEmail, name);
-			}
-		} else {
-			user = userService.findByEmailOrName(fromEmail, name);
+	private Comparator getdateComparator() {
+		if(dateComparator == null){
+			dateComparator = new Comparator<Message>() {
+				public int compare(Message o1, Message o2) {
+					try {
+						Date date1= o1.getSentDate();
+						Date date2= o2.getSentDate();
+						if(date1 != null && date2 != null) {
+							if(date1.before(date2)) return -1;
+						}
+						
+					} catch (MessagingException e) {
+						e.printStackTrace();
+					}
+					return 1;
+				}
+			};
 		}
-		return user;
+		return dateComparator;
 	}
 	
 	private String getFromUserName(String from) {
@@ -230,52 +202,53 @@ public class EmailReceiverService {
 //		
 //		receiver.setUserName("huangcunwei0701@sina.com");
 //		receiver.setPassword("ai");
-		Properties properties = new Properties();
-		properties.put(String.format("mail.%s.host", "imap"), "imap.sina.com");
-		properties.put(String.format("mail.%s.port", "imap"), 143);
-
-		Session session = Session.getDefaultInstance(properties);
-		Store store;
-		try {
-			store = session.getStore("imap");
-			store.connect("huangcunwei0701@sina.com", "");
-			Folder folderInbox = store.getFolder("INBOX");
-			folderInbox.open(Folder.READ_WRITE);
-			Message[] messages = folderInbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-			for (Message message : messages) {
-				Date sendDate = message.getSentDate();
-				String subject = message.getSubject();
-				System.out.print("subject1 : " + subject);
-				System.out.println("sendDate1 : " + DateTimeUtils.toStr(sendDate, DateTimeUtils.DATE_TIME_MASK));
-			}
-			Arrays.sort(messages, new Comparator<Message>() {
-				public int compare(Message o1, Message o2) {
-					try {
-						Date date1= o1.getSentDate();
-						Date date2= o2.getSentDate();
-						if(date1 != null && date2 != null) {
-							if(date1.before(date2)) return -1;
-						}
-						
-					} catch (MessagingException e) {
-						e.printStackTrace();
-					}
-					return 1;
-				}
-			});
-			for (Message message : messages) {
-				Date sendDate = message.getSentDate();
-				String subject = message.getSubject();
-				System.out.print("subject2 : " + subject);
-				System.out.println("sendDate2: " + DateTimeUtils.toStr(sendDate, DateTimeUtils.DATE_TIME_MASK));
-			}
-		} catch (NoSuchProviderException e1) {
-			e1.printStackTrace();
-		} catch (MessagingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
+		
+//		Properties properties = new Properties();
+//		properties.put(String.format("mail.%s.host", "imap"), "imap.sina.com");
+//		properties.put(String.format("mail.%s.port", "imap"), 143);
+//
+//		Session session = Session.getDefaultInstance(properties);
+//		Store store;
+//		try {
+//			store = session.getStore("imap");
+//			store.connect("huangcunwei0701@sina.com", "");
+//			Folder folderInbox = store.getFolder("INBOX");
+//			folderInbox.open(Folder.READ_WRITE);
+//			Message[] messages = folderInbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+//			for (Message message : messages) {
+//				Date sendDate = message.getSentDate();
+//				String subject = message.getSubject();
+//				System.out.print("subject1 : " + subject);
+//				System.out.println("sendDate1 : " + DateTimeUtils.toStr(sendDate, DateTimeUtils.DATE_TIME_MASK));
+//			}
+//			Arrays.sort(messages, new Comparator<Message>() {
+//				public int compare(Message o1, Message o2) {
+//					try {
+//						Date date1= o1.getSentDate();
+//						Date date2= o2.getSentDate();
+//						if(date1 != null && date2 != null) {
+//							if(date1.before(date2)) return -1;
+//						}
+//						
+//					} catch (MessagingException e) {
+//						e.printStackTrace();
+//					}
+//					return 1;
+//				}
+//			});
+//			for (Message message : messages) {
+//				Date sendDate = message.getSentDate();
+//				String subject = message.getSubject();
+//				System.out.print("subject2 : " + subject);
+//				System.out.println("sendDate2: " + DateTimeUtils.toStr(sendDate, DateTimeUtils.DATE_TIME_MASK));
+//			}
+//		} catch (NoSuchProviderException e1) {
+//			e1.printStackTrace();
+//		} catch (MessagingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 
    }
 }

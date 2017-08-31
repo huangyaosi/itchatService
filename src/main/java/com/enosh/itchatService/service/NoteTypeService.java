@@ -1,13 +1,18 @@
 package com.enosh.itchatService.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.enosh.itchatService.dao.NoteTypeRepository;
+import com.enosh.itchatService.dispatcher.KeyMethodMapping;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.User;
 
 @Service
+@KeyMethodMapping
 public class NoteTypeService extends AbsService<NoteType>{
 
 	@Autowired NoteTypeRepository noteTypeRepository;
@@ -17,7 +22,10 @@ public class NoteTypeService extends AbsService<NoteType>{
 		return noteTypeRepository;
 	}
 
-	public void createNoteType(User user, String tag, String alias, String description) {
+	@KeyMethodMapping("key.to.method.create-book-tag")
+	public void createNoteType(String tag, String alias) {
+		User user = ThreadLocalUtils.getCurrentUser();
+		String description = ThreadLocalUtils.getMailContent();
 		NoteType noteType = getDAO().findByTagOrAlias(user, tag, alias);
 		if(noteType != null) {
 			//TODO:发送相关的邮件
@@ -26,6 +34,7 @@ public class NoteTypeService extends AbsService<NoteType>{
 			noteType.setUser(user);
 			noteType.setTag(tag);
 			noteType.setAlias(alias);
+			noteType.setDescription(description);
 			save(noteType);
 		}
 	}
@@ -36,4 +45,9 @@ public class NoteTypeService extends AbsService<NoteType>{
 	public NoteType findByUserAndEqTagOrAlias(User user, String tagOrAlias) {
 		return getDAO().findByUserAndEqTagOrAlias(user, tagOrAlias);
 	}
+	
+	public List<NoteType> findByUserAndCompletedAndGenereated(User user, boolean completed, boolean genereated) {
+		return getDAO().findByUserAndCompletedAndGenereated(user, completed, genereated);
+	}
+
 }
