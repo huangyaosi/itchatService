@@ -49,8 +49,8 @@ public class EmailReceiverService {
 	
 	private Comparator dateComparator;
 	
-	@Scheduled(cron = "0 */30 * * * *")
-//	@Scheduled(cron = "*/40 * * * * *")
+//	@Scheduled(cron = "0 */30 * * * *")
+	@Scheduled(cron = "*/50 * * * * *")
 	public void pollNewEmails() {
 		System.out.println(DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_TIME_MASK) + "-------start search new email...");
 		Properties properties = new Properties();
@@ -96,9 +96,9 @@ public class EmailReceiverService {
 						args = new Object[1];
 						key = matcher.group(1);
 						args[0] = matcher.group(2);
+					} else {
+						key = subject;
 					}
-				} else {
-					key = subject;
 				}
 				dispacher.dispatchRequest(key, args);
 
