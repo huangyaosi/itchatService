@@ -40,16 +40,6 @@ public class MailSenderService{
 	    }
 	}
 	
-	@Scheduled(cron = "*/40 * * * * *")
-	public void mailTest() {
-		System.out.println("start test ...");
-		String to = "hcunwei@rs.com";
-		String subject = "testing";
-		String content = "hello";
-		sendNormalEmail(to, subject, content);
-		System.out.println("end test ...");
-	}
-	
 	public void sendNormalEmail(String to, String subject, String content) {
 		MimeMessage message = mailSender.createMimeMessage();
 		try {
