@@ -20,8 +20,8 @@ public class MailSenderTest {
 	@Autowired private JavaMailSender mailSender;
 	@Autowired MailSenderConfig mailSenderConfig;
 	
-//	@Test
-//	public void sendEmailWithAttachment() throws MessagingException {
+	@Test
+	public void sendEmailWithAttachment() throws MessagingException {
 //		String to = "hcunwei@rs.com";
 //		String subject = "testing";
 //		String content = "hello";
@@ -32,5 +32,5 @@ public class MailSenderTest {
 //		helper.setSubject(subject);
 //		helper.setText(content);
 //		mailSender.send(message);
-//	}
+	}
 }
