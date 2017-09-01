@@ -64,6 +64,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>            
         </dependency>
+<!--         <dependency>
+		    <groupId>com.icegreen</groupId>
+		    <artifactId>greenmail</artifactId>
+		    <version>1.5.5</version>
+		    <scope>test</scope>
+		</dependency> -->
+        
 	</dependencies>
     <!-- Additional lines to be added here... -->
 

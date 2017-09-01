@@ -50,7 +50,7 @@ public class MailSenderService{
 
 	        mailSender.send(message);
 	    } catch (MessagingException e) {
-	    	
+	    	e.printStackTrace();
 	    }
 	}
 
