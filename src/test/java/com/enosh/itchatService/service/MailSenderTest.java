@@ -20,17 +20,17 @@ public class MailSenderTest {
 	@Autowired private JavaMailSender mailSender;
 	@Autowired MailSenderConfig mailSenderConfig;
 	
-	@Test
-	public void sendEmailWithAttachment() throws MessagingException {
-		String to = "hcunwei@rs.com";
-		String subject = "testing";
-		String content = "hello";
-		MimeMessage message = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, true);
-		helper.setFrom(mailSenderConfig.getFromPdf());
-		helper.setTo(to);
-		helper.setSubject(subject);
-		helper.setText(content);
-		mailSender.send(message);
-	}
+//	@Test
+//	public void sendEmailWithAttachment() throws MessagingException {
+//		String to = "hcunwei@rs.com";
+//		String subject = "testing";
+//		String content = "hello";
+//		MimeMessage message = mailSender.createMimeMessage();
+//		MimeMessageHelper helper = new MimeMessageHelper(message, true);
+//		helper.setFrom(mailSenderConfig.getFromPdf());
+//		helper.setTo(to);
+//		helper.setSubject(subject);
+//		helper.setText(content);
+//		mailSender.send(message);
+//	}
 }
