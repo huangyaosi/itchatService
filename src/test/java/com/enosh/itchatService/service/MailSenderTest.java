@@ -16,9 +16,10 @@ public class MailSenderTest {
 	
 	@Test
 	public void sendEmailWithAttachment() {
-//		String to = "hcunwei@rs.com";
-//		String content = "hello";
-//		File file = new File("C:\\Users\\hcunwei\\Downloads\\response.pdf");
-//		mailSenderService.sendEmailWithAttachment(to, "", content, file);
+		String to = "hcunwei@rs.com";
+		String subject = "testing";
+		String content = "hello";
+		
+		mailSenderService.sendNormalEmail(to, subject, content);
 	}
 }

@@ -205,7 +205,7 @@ public class ItextService {
 		}
     }
     
-//	@Scheduled(cron = "0 0 8 * * *")
+	@Scheduled(cron = "0 27 9 1 * ?")
 	public void createPdfForNote() {
 		Iterable<User> users = userService.getDAO().findAll();
     	List<User> userList = new ArrayList<User>();
