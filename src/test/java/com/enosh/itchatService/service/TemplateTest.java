@@ -1,6 +1,5 @@
 package com.enosh.itchatService.service;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
+@SpringBootTest({"java.net.preferIPv4Stack=true"})
 public class TemplateTest {
 	@Autowired FreeMakerTemplateService freeMakerTemplateService;
 	@Autowired private MailSenderService mailSenderService;
