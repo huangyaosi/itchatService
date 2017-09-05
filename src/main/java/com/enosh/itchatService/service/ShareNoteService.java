@@ -95,7 +95,7 @@ public class ShareNoteService extends AbsService<ShareNote>{
 			ShareNote shareNote = new ShareNote();
 			shareNote.setNickName(user.getUsername());
 			shareNote.setText(text);
-			shareNote.setCreationDate(new Date());
+			shareNote.setCreationDate(date);
 			
 			shareNote.setModificationDate(date);
 			shareNote.setUser(user);
@@ -104,6 +104,5 @@ public class ShareNoteService extends AbsService<ShareNote>{
 	}
 	
 	 public static void main(String[] args) throws IOException, DocumentException {
-	       
 	 }
 }

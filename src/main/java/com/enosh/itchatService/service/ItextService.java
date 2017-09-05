@@ -1,12 +1,11 @@
 package com.enosh.itchatService.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.enosh.itchatService.config.MailSenderConfig;
 import com.enosh.itchatService.config.PdfConfig;
+import com.enosh.itchatService.dispatcher.KeyMethodMapping;
 import com.enosh.itchatService.model.Note;
 import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.ShareNote;
@@ -35,8 +35,10 @@ import com.itextpdf.text.pdf.PdfPageEvent;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.draw.DottedLineSeparator;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 @Service
+@KeyMethodMapping
 public class ItextService {
     
     @Autowired ShareNoteService shareNoteService;
@@ -87,6 +89,13 @@ public class ItextService {
 	        	dateChunk.setBackground(BaseColor.GREEN);
 	        	Paragraph dateSection = new Paragraph(dateChunk);
 	        	dateSection.setAlignment(Paragraph.ALIGN_RIGHT);
+//	        	ElementList list = XMLWorkerHelper.parseToElementList(shareNote.getText(), null);
+//	        	Paragraph content = new Paragraph();
+//	        	content.setFont(contentFont);
+//	        	
+//	        	for (Element element : list) {
+//	        		content.add(element);
+//				}
 	        	Paragraph content = new Paragraph(shareNote.getText(), contentFont);
 	        	chapter.add(dateSection);
 	        	chapter.add(content);
@@ -205,7 +214,7 @@ public class ItextService {
 		}
     }
     
-	@Scheduled(cron = "0 27 9 1 * ?")
+	@Scheduled(cron = "0 30 7 ? * 7")
 	public void createPdfForNote() {
 		Iterable<User> users = userService.getDAO().findAll();
     	List<User> userList = new ArrayList<User>();
@@ -213,6 +222,35 @@ public class ItextService {
     		List<NoteType> noteTypes = noteTypeService.findByUserAndCompletedAndGenereated(user, true, false);
 			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
 		}
+	}
+	
+	@KeyMethodMapping("key.to.method.generate-share-note")
+	public void createPdfForShareNote(String fromMonth, String toMonth) {
+		System.out.println("Trigger by email. Start generate shareNote and email for all...");
+    	Iterable<User> users = userService.findAll();
+    	List<User> userList = new ArrayList<User>();
+    	for (User user : users) {
+			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
+		}
+    	
+    	for (User user : userList) {
+    		File file = createPdf(user, fromMonth, toMonth);
+    		if(file != null && file.exists()) {
+    			String content = "Please don't reply, thanks";
+    			String subject = getSubject(user, fromMonth, toMonth);
+    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
+    		}
+		}
+	}
+	
+	public String getSubject(User user, String fromMonth, String toMonth) {
+		String subject = "";
+		if(!fromMonth.equals(toMonth)) {
+			subject = user.getUsername() + " " + fromMonth + "-" + toMonth + mailSenderConfig.getSubjectPdf();
+		} else {
+			subject = user.getUsername() + " " + fromMonth + mailSenderConfig.getSubjectPdf();
+		}
+		return subject;
 	}
 	
     class CustomDashedLineSeparator extends DottedLineSeparator {
@@ -310,9 +348,17 @@ public class ItextService {
     }
     
     public static void main(String[] args) throws IOException, DocumentException {
-    	String dest = "C:/Users/hcunwei/Library/tem/chapter_title.pdf";
-        File file = new File(dest);
-        file.getParentFile().mkdirs();
-        new ItextService().createPdfTest(dest);
+		String dest = "C:/Users/hcunwei/Library/tem/t.pdf";
+		String source = "C:/Users/hcunwei/Library/tem/t.html";
+		Document document = new Document();
+		// step 2
+		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(dest));
+		// step 3
+		writer.setTagged();
+		document.open();
+		// step 4
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, new FileInputStream(source));
+		// step 5
+		document.close();
     }
 }

@@ -96,7 +96,7 @@ public class EmailReceiverService {
 						args = new Object[1];
 						key = matcher.group(1);
 						args[0] = matcher.group(2);
-					} else {
+					} else if(subject.length() <= 6){
 						key = subject;
 					}
 				}

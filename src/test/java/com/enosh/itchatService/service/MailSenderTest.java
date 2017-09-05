@@ -31,6 +31,6 @@ public class MailSenderTest {
 		helper.setTo(to);
 		helper.setSubject(subject);
 		helper.setText(content);
-//		mailSender.send(message);
+		mailSender.send(message);
 	}
 }
