@@ -26,11 +26,16 @@ public class NoteService extends AbsService<Note>{
 		return noteRepository;
 	}
 
-	public void createNote(String key) {
+	public boolean createNote(String key) {
+		boolean succeed = false;
 		User user = ThreadLocalUtils.getCurrentUser();
 		NoteType noteType = noteTypeService.findByUserAndEqTagOrAlias(user, key);
 		String text = ThreadLocalUtils.getMailContent();
-		if(!StringUtils.isEmpty(text) && noteType != null) createNote(user, noteType, text);
+		if( noteType != null) {
+			createNote(user, noteType, text);
+			succeed = true;
+		} 
+		return succeed;
 	}
 	
 	public void createNote(User user, NoteType noteType, String text) {

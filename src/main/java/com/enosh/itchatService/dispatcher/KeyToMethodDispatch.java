@@ -77,8 +77,8 @@ public class KeyToMethodDispatch {
 	public void dispatchRequest(String key, Object[] args) {
 		if(!StringUtils.isEmpty(key)) {
 			if(args == null) {
-				noteService.createNote(key);
-				return;
+				boolean succeed = noteService.createNote(key);
+				if(succeed) return;
 			} else {
 				MethodWrapper methodWrapper = keyToMethodMap.get(key);
 				if(methodWrapper != null) {
