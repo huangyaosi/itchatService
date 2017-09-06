@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("pdf")
 public class PdfConfig {
 	private String shareNoteTitle;
+	private String noteTitle;
 	private String directoryPath;
 	private String frontPath;
 	public String getShareNoteTitle() {
@@ -26,6 +27,12 @@ public class PdfConfig {
 	}
 	public void setFrontPath(String frontPath) {
 		this.frontPath = frontPath;
+	}
+	public String getNoteTitle() {
+		return noteTitle;
+	}
+	public void setNoteTitle(String noteTitle) {
+		this.noteTitle = noteTitle;
 	}
 	
 }

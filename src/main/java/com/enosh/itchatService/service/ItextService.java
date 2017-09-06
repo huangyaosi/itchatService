@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.enosh.itchatService.config.MailSenderConfig;
 import com.enosh.itchatService.config.PdfConfig;
 import com.enosh.itchatService.dispatcher.KeyMethodMapping;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.Note;
 import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.ShareNote;
@@ -89,13 +90,6 @@ public class ItextService {
 	        	dateChunk.setBackground(BaseColor.GREEN);
 	        	Paragraph dateSection = new Paragraph(dateChunk);
 	        	dateSection.setAlignment(Paragraph.ALIGN_RIGHT);
-//	        	ElementList list = XMLWorkerHelper.parseToElementList(shareNote.getText(), null);
-//	        	Paragraph content = new Paragraph();
-//	        	content.setFont(contentFont);
-//	        	
-//	        	for (Element element : list) {
-//	        		content.add(element);
-//				}
 	        	Paragraph content = new Paragraph(shareNote.getText(), contentFont);
 	        	chapter.add(dateSection);
 	        	chapter.add(content);
@@ -193,11 +187,12 @@ public class ItextService {
     }
     
     // every the next month's first date at 8:00 to generate share note and email for all.
-	@Scheduled(cron = "0 0 8 1 * ?")
-//	@Scheduled(cron = "*/40 * * * * *")
-    public void batchCreatePdf() {
+    // every Saturday
+//	@Scheduled(cron = "0 0 8 1 * ?")
+    @Scheduled(cron = "0 30 7 ? * 7")
+    public void batchCreatePdfForShareNote() {
 		System.out.println("Start generate shareNote and email for all...");
-    	Iterable<User> users = userService.getDAO().findAll();
+    	Iterable<User> users = userService.findAll();
     	List<User> userList = new ArrayList<User>();
     	for (User user : users) {
 			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
@@ -216,7 +211,7 @@ public class ItextService {
     
 	@Scheduled(cron = "0 30 7 ? * 7")
 	public void createPdfForNote() {
-		Iterable<User> users = userService.getDAO().findAll();
+		Iterable<User> users = userService.findAll();
     	List<User> userList = new ArrayList<User>();
     	for (User user : users) {
     		List<NoteType> noteTypes = noteTypeService.findByUserAndCompletedAndGenereated(user, true, false);
@@ -224,11 +219,34 @@ public class ItextService {
 		}
 	}
 	
-	@KeyMethodMapping("key.to.method.generate-share-note")
-	public void createPdfForShareNote(String fromMonth, String toMonth) {
+	@KeyMethodMapping("key.to.method.generate-personal-note")
+	public void generateNote(String books) {
+		User user = ThreadLocalUtils.getCurrentUser();
+		List<NoteType> noteTypes = noteTypeService.findByUserAndCompletedAndGenereated(user, true, false);
+		if(!StringUtils.isEmpty(user.getPrimaryEmail())) {
+			Document document = new Document();
+    		String dir = pdfConfig.getDirectoryPath() + pdfConfig.getNoteTitle() + "_" + user.getUsername() + ".pdf";
+    		File file = new File(dir);
+            file.getParentFile().mkdirs();
+    		try {
+    			PdfWriter.getInstance(document, new FileOutputStream(dir));
+    			document.open();
+    			for (NoteType noteType : noteTypes) {
+    				createPdfForNote(document, user, noteType);
+    			}
+    			document.close();
+    		} catch (FileNotFoundException | DocumentException e) {
+    			e.printStackTrace();
+    		}
+		}
+	}
+	
+	@KeyMethodMapping("key.to.method.generate-share-note-for-all")
+	public void generateShareNoteForAll(String fromMonth, String toMonth) {
 		System.out.println("Trigger by email. Start generate shareNote and email for all...");
     	Iterable<User> users = userService.findAll();
     	List<User> userList = new ArrayList<User>();
+    	
     	for (User user : users) {
 			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
 		}
@@ -241,6 +259,34 @@ public class ItextService {
     			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
     		}
 		}
+	}
+	
+	@KeyMethodMapping("key.to.method.generate-share-note-for-one")
+	public void generateShareNoteForOne(String userName, String fromMonth, String toMonth) {
+		System.out.println("Trigger by email. Start generate shareNote for..." + userName);
+    	User user = userService.findByUsername(userName);
+    	if(user != null && !StringUtils.isEmpty(user.getPrimaryEmail())) {
+    		File file = createPdf(user, fromMonth, toMonth);
+    		if(file != null && file.exists()) {
+    			String content = "Please don't reply, thanks";
+    			String subject = getSubject(user, fromMonth, toMonth);
+    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
+    		}
+    	}
+	}
+	
+	@KeyMethodMapping("key.to.method.generate-personal-share-note")
+	public void generatePersonalShareNote(String fromMonth, String toMonth) {
+    	User user = ThreadLocalUtils.getCurrentUser();
+    	System.out.println("Trigger by email. Start generate personal shareNote for..." + user.getUsername());
+    	if(user != null && StringUtils.isEmpty(user.getPrimaryEmail())) {
+    		File file = createPdf(user, fromMonth, toMonth);
+    		if(file != null && file.exists()) {
+    			String content = "Please don't reply, thanks";
+    			String subject = getSubject(user, fromMonth, toMonth);
+    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
+    		}
+    	}
 	}
 	
 	public String getSubject(User user, String fromMonth, String toMonth) {

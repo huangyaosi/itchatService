@@ -44,13 +44,14 @@ public class EmailReceiverService {
 	@Autowired KeyToMethodDispatch dispacher;
 	
 	public static final Pattern EMAIL_PATTERN_1 = Pattern.compile("\\<(.*@.*)\\>");
-	public static final Pattern SUBJECT_PATTERN_1 = Pattern.compile("(.*)[:|：](.*)[:|：](.*)");
-	public static final Pattern SUBJECT_PATTERN_2 = Pattern.compile("(.*)[:|：](.*)");
+	public static final Pattern SUBJECT_PATTERN_1 = Pattern.compile("(.*)[:|：](.*)[:|：](.*)[:|：](.*)");
+	public static final Pattern SUBJECT_PATTERN_2 = Pattern.compile("(.*)[:|：](.*)[:|：](.*)");
+	public static final Pattern SUBJECT_PATTERN_3 = Pattern.compile("(.*)[:|：](.*)");
 	
 	private Comparator dateComparator;
 	
-	@Scheduled(cron = "0 */30 * * * *")
-//	@Scheduled(cron = "*/40 * * * * *")
+//	@Scheduled(cron = "0 */30 * * * *")
+	@Scheduled(cron = "*/40 * * * * *")
 	public void pollNewEmails() {
 		System.out.println(DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_TIME_MASK) + "-------start search new email...");
 		Properties properties = new Properties();
@@ -88,11 +89,17 @@ public class EmailReceiverService {
 				if(!StringUtils.isEmpty(subject)){
 					Matcher matcher = SUBJECT_PATTERN_1.matcher(subject);
 					if(matcher.find()) {
+						args = new Object[3];
+						key = matcher.group(1);
+						args[0] = matcher.group(2);
+						args[1] = matcher.group(3);
+						args[2] = matcher.group(4);
+					} else if((matcher = SUBJECT_PATTERN_2.matcher(subject)).find()) {
 						args = new Object[2];
 						key = matcher.group(1);
 						args[0] = matcher.group(2);
 						args[1] = matcher.group(3);
-					} else if((matcher = SUBJECT_PATTERN_2.matcher(subject)).find()) {
+					} else if((matcher = SUBJECT_PATTERN_3.matcher(subject)).find()) {
 						args = new Object[1];
 						key = matcher.group(1);
 						args[0] = matcher.group(2);

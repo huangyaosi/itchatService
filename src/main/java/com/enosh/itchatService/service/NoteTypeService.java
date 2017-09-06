@@ -49,5 +49,9 @@ public class NoteTypeService extends AbsService<NoteType>{
 	public List<NoteType> findByUserAndCompletedAndGenereated(User user, boolean completed, boolean genereated) {
 		return getDAO().findByUserAndCompletedAndGenereated(user, completed, genereated);
 	}
+	
+	public List<NoteType> findByUser(User user) {
+		return getDAO().findByUser(user);
+	}
 
 }

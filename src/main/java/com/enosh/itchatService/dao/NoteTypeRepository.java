@@ -11,9 +11,11 @@ import com.enosh.itchatService.model.User;
 @Repository
 public interface NoteTypeRepository extends AbsRepository<NoteType>{
 	
-	public NoteType findByUserAndTag(User user, String tag);
+	public List<NoteType> findByUser(User user);
 	
-	public NoteType findByUserAndAlias(User user, String alias);
+	public List<NoteType> findByUserAndTag(User user, String tag);
+	
+	public List<NoteType> findByUserAndAlias(User user, String alias);
 	
 	@Query("select n from NoteType n where n.user=?1 and (n.tag=?2 or n.alias=?2)")
 	public NoteType findByUserAndEqTagOrAlias(User user, String tagOrAlias);
