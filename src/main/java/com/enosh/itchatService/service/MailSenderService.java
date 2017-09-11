@@ -9,18 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.enosh.itchatService.common.model.MailEntity;
+import com.enosh.itchatService.common.model.MailTemplate;
 import com.enosh.itchatService.config.MailSenderConfig;
+import com.enosh.itchatService.utils.Strings;
 
 @Service
 public class MailSenderService{
 
-	@Autowired
-    private JavaMailSender mailSender;
-
-	@Autowired MailSenderConfig mailSenderConfig;
+	@Autowired private JavaMailSender mailSender;
+	@Autowired private MailSenderConfig mailSenderConfig;
+	@Autowired private FreeMakerTemplateService freeMakerTemplateService;
     
 	public void sendEmailWithAttachment(String to, String subject, String content, File file) {
 		MimeMessage message = mailSender.createMimeMessage();
@@ -40,19 +41,41 @@ public class MailSenderService{
 	    }
 	}
 	
-	public void sendNormalEmail(String to, String subject, String content) {
+	public void sendEmail(MailEntity mailEntity) {
+		String content = "";
+		String to = "";
+		String subject = "";
+		
+		if(Strings.isEmpty(mailEntity.getTo())) {
+			//TODO:
+		}
+		
+		MailTemplate template = mailEntity.getTemplate();
+		if(template != null && !Strings.isEmpty(template.getTemplate())) {
+			content = freeMakerTemplateService.formatTemplate(template.getTemplate(), mailEntity.getMap());
+			subject = !Strings.isEmpty(template.getSubject()) ? template.getSubject() : mailEntity.getSubject();
+		} else {
+			content = mailEntity.getContent();
+			subject = mailEntity.getSubject();
+		}
+		
 		MimeMessage message = mailSender.createMimeMessage();
 		try {
 	        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 	        helper.setFrom(mailSenderConfig.getFromPdf());
-	        helper.setTo(to);
+	        helper.setTo(mailEntity.getTo());
 	        helper.setSubject(subject);
 	        helper.setText(content);
 
+	        if(mailEntity.getAttachments() != null && mailEntity.getAttachments().size() > 0) {
+	        	for (File attachment : mailEntity.getAttachments()) {
+	        		helper.addAttachment(attachment.getName(), attachment);
+				}
+	        }
 	        mailSender.send(message);
 	    } catch (MessagingException e) {
 	    	e.printStackTrace();
 	    }
+		
 	}
-
 }

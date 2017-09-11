@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.enosh.itchatService.service.ItextService;
+import com.enosh.itchatService.service.EBookGeneraterService;
 import com.enosh.itchatService.service.ShareNoteService;
 import com.enosh.itchatService.service.UserService;
 
@@ -23,7 +23,7 @@ public class ItchatControllerTest {
 	private MockMvc mockMvc;
 	
 	@MockBean ShareNoteService shareNoteService;
-	@MockBean private ItextService itextService;
+	@MockBean private EBookGeneraterService eBookGeneraterService;
 	@MockBean private UserService userService;
 	
 //	@Before

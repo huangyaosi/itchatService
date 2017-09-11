@@ -1,6 +1,10 @@
 package com.enosh.itchatService.utils;
 
-public class StringUtils {
+public class Strings {
+	public static final String COLON_DELIMITER = ":";
+	public static final String SEMICOLON_DELIMITER = ":"; 
+	public static final String COMMA_DELIMITER = ":"; 
+	
 	public static boolean isEmpty(String str) {
 		return str !=null ? str.trim().length() == 0 : true;
 	}
@@ -51,6 +55,12 @@ public class StringUtils {
 				costs[s2.length()] = lastValue;
 		}
 		return costs[s2.length()];
+	}
+	
+	public static void append(StringBuilder sb, String str, String delimiter){
+		if(!isEmpty(sb.toString())) {
+			sb.append(delimiter).append(str);
+		}
 	}
 	
 	public static void main(String args[]) {

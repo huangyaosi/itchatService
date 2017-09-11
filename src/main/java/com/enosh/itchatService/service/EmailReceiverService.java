@@ -29,7 +29,7 @@ import com.enosh.itchatService.dispatcher.KeyToMethodDispatch;
 import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
 import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
-import com.enosh.itchatService.utils.StringUtils;
+import com.enosh.itchatService.utils.Strings;
 
 /**
 * This program just for get e-mail messages from a POP3/IMAP server
@@ -86,7 +86,7 @@ public class EmailReceiverService {
 				
 				String key = "";
 				Object[] args = null;
-				if(!StringUtils.isEmpty(subject)){
+				if(!Strings.isEmpty(subject)){
 					Matcher matcher = SUBJECT_PATTERN_1.matcher(subject);
 					if(matcher.find()) {
 						args = new Object[3];
@@ -186,7 +186,7 @@ public class EmailReceiverService {
 			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
 			if (bodyPart.isMimeType("text/plain")) {
 				result = (String) bodyPart.getContent();
-				if (!StringUtils.isEmpty(result))
+				if (!Strings.isEmpty(result))
 					break;
 			} else if (bodyPart.getContent() instanceof MimeMultipart) {
 				result = result + getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent());

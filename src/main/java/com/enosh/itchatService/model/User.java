@@ -3,7 +3,7 @@ package com.enosh.itchatService.model;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.enosh.itchatService.utils.StringUtils;
+import com.enosh.itchatService.utils.Strings;
 
 @Entity
 @Table(name = "users")
@@ -68,16 +68,16 @@ public class User extends AbsEntity{
 	}
 	
 	public void addEmail(String email) {
-		if(StringUtils.isEmpty(email)) return;
+		if(Strings.isEmpty(email)) return;
 		
-		if(StringUtils.isEmpty(primaryEmail)) {
+		if(Strings.isEmpty(primaryEmail)) {
 			primaryEmail = email;
 			return;
 		} else if(primaryEmail.equals(email)) {
 			return;
 		}
 		
-		if(StringUtils.isEmpty(this.otherEmails)) {
+		if(Strings.isEmpty(this.otherEmails)) {
 			otherEmails = email;
 		} else if(otherEmails.indexOf(email) == -1){
 			otherEmails = otherEmails + "," + email;

@@ -19,7 +19,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import com.enosh.itchatService.service.NoteService;
 import com.enosh.itchatService.service.ShareNoteService;
-import com.enosh.itchatService.utils.StringUtils;
+import com.enosh.itchatService.utils.Strings;
 
 @Configuration("dispacher")
 @PropertySource("classpath:key-method.properties")
@@ -63,7 +63,7 @@ public class KeyToMethodDispatch {
 						}
 					}
 					
-					if(bean != null && !StringUtils.isEmpty(key)) {
+					if(bean != null && !Strings.isEmpty(key)) {
 						MethodWrapper methodWrapper = new MethodWrapper(bean, method, parameterTypes);
 						keyToMethodMap.put(key, methodWrapper);
 					}
@@ -75,7 +75,7 @@ public class KeyToMethodDispatch {
 	}
 
 	public void dispatchRequest(String key, Object[] args) {
-		if(!StringUtils.isEmpty(key)) {
+		if(!Strings.isEmpty(key)) {
 			if(args == null) {
 				boolean succeed = noteService.createNote(key);
 				if(succeed) return;

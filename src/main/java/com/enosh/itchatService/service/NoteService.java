@@ -12,7 +12,7 @@ import com.enosh.itchatService.model.Note;
 import com.enosh.itchatService.model.NoteType;
 import com.enosh.itchatService.model.User;
 import com.enosh.itchatService.utils.DateTimeUtils;
-import com.enosh.itchatService.utils.StringUtils;
+import com.enosh.itchatService.utils.Strings;
 
 @Service
 public class NoteService extends AbsService<Note>{
@@ -39,11 +39,11 @@ public class NoteService extends AbsService<Note>{
 	}
 	
 	public void createNote(User user, NoteType noteType, String text) {
-		if(StringUtils.isEmpty(text)) return;
+		if(Strings.isEmpty(text)) return;
 		List<Note> notes = getDAO().findByCreationDate(user, DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_MASK));
 		if(notes != null) {
 			for (Note note : notes) {
-				double percent = StringUtils.similarity(text, note.getText());
+				double percent = Strings.similarity(text, note.getText());
 				System.out.println(percent);
 				if(percent >= 0.9d){
 					note.setText(text);

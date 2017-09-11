@@ -1,6 +1,7 @@
 package com.enosh.itchatService.controller;
 
 import java.io.File;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.enosh.itchatService.service.ItextService;
+import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
+import com.enosh.itchatService.model.User;
+import com.enosh.itchatService.service.EBookGeneraterService;
+import com.enosh.itchatService.service.NoteTypeService;
 import com.enosh.itchatService.service.ShareNoteService;
 import com.enosh.itchatService.service.UserService;
 
@@ -21,8 +25,9 @@ import com.enosh.itchatService.service.UserService;
 public class ItchatController {
 	
 	@Autowired private ShareNoteService shareNoteService;
-	@Autowired private ItextService itextService;
+	@Autowired private EBookGeneraterService eBookGeneraterService;
 	@Autowired private UserService userService;
+	@Autowired private NoteTypeService noteTypeService;
 	
 	@RequestMapping("/save")
     public String saveText(@RequestParam(required=true)String text, 
@@ -37,7 +42,7 @@ public class ItchatController {
     		@RequestParam(required = true)String fromMonth,
     		@RequestParam(required = true)String toMonth) {
 		
-        File file = itextService.createPdf(nickName, fromMonth, toMonth);
+        File file = eBookGeneraterService.createPdf(nickName, fromMonth, toMonth);
         if(file == null) return null;
         
         HttpHeaders headers = new HttpHeaders();
@@ -57,9 +62,14 @@ public class ItchatController {
 	
 	@RequestMapping("/getBookNote")
 	public ResponseEntity<Resource> getBookNote(@RequestParam(required = true)String userName, 
-    		@RequestParam(required = true)String bookTagOrAlias) {
+    		@RequestParam(required = true)String tags) {
 		
-		File file = itextService.createPdfForNote(userName, bookTagOrAlias, null);
+		User user = userService.findByUsername(userName);
+		if(user == null) return null;
+		
+		ThreadLocalUtils.init(user, new Date(), "");
+		
+		File file = eBookGeneraterService.generateNote(tags);
 		if(file == null) return null;
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -69,4 +79,15 @@ public class ItchatController {
 		
         return new ResponseEntity<Resource>(fileSystemResource, headers, HttpStatus.OK);
 	}
+	
+	@RequestMapping("/createTag")
+    public String createTag(@RequestParam(required=true)String username, 
+    		@RequestParam(required=true) String bookTag,
+    		@RequestParam(required=true) String alias,
+    		@RequestParam(required=false) String description) {
+		User user = userService.findByUsername(username);
+		ThreadLocalUtils.init(user, new Date(), description);
+		noteTypeService.createNoteType(bookTag, alias);
+        return "Save note successfully !";    
+    }
 }

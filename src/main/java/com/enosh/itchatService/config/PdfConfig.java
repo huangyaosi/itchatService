@@ -10,6 +10,7 @@ public class PdfConfig {
 	private String noteTitle;
 	private String directoryPath;
 	private String frontPath;
+	private String footer;
 	public String getShareNoteTitle() {
 		return shareNoteTitle;
 	}
@@ -34,5 +35,10 @@ public class PdfConfig {
 	public void setNoteTitle(String noteTitle) {
 		this.noteTitle = noteTitle;
 	}
-	
+	public String getFooter() {
+		return footer;
+	}
+	public void setFooter(String footer) {
+		this.footer = footer;
+	}
 }
