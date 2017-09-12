@@ -1,4 +1,4 @@
-package com.enosh.itchatService.init.service;
+package com.enosh.itchatService.init;
 
 import java.util.Date;
 import java.util.List;
