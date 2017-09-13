@@ -42,7 +42,7 @@ public class ItchatController {
     		@RequestParam(required = true)String fromMonth,
     		@RequestParam(required = true)String toMonth) {
 		
-        File file = eBookGeneraterService.createPdf(nickName, fromMonth, toMonth);
+        File file = eBookGeneraterService.createPdfForShareNote(nickName, fromMonth, toMonth);
         if(file == null) return null;
         
         HttpHeaders headers = new HttpHeaders();
@@ -51,6 +51,13 @@ public class ItchatController {
 		FileSystemResource fileSystemResource = new FileSystemResource(file);
 		
         return new ResponseEntity<Resource>(fileSystemResource, headers, HttpStatus.OK);
+    }
+	
+	@RequestMapping("/batchGenerateShareNoteByWeek")
+    public void batchGenerateShareNoteByWeek(@RequestParam(required = true)String fromDate,
+    		@RequestParam(required = true)String toDate) {
+		
+        eBookGeneraterService.batchGenerateShareNoteByWeek(fromDate, toDate);
     }
 	
 	@RequestMapping("/createUser")

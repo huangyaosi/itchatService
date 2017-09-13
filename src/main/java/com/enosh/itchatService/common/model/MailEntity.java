@@ -1,6 +1,7 @@
 package com.enosh.itchatService.common.model;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,12 @@ public class MailEntity {
 	}
 	public void setAttachments(List<File> attachments) {
 		this.attachments = attachments;
+	}
+	public void addAttachments(File file) {
+		if(attachments == null) {
+			attachments = new ArrayList<File>();
+		}
+		attachments.add(file);
 	}
 	public Map<String, String> getMap() {
 		return map;

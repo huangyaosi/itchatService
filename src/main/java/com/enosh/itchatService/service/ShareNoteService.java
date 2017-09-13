@@ -30,11 +30,15 @@ public class ShareNoteService extends AbsService<ShareNote>{
 	@Autowired private UserService userService;
 	
 	public List<ShareNote> findByNickNameAndMonth(String nickName, String fromMonth, String toMonth) {
-		return shareNoteRepository.findByNickNameAndMonth(nickName, fromMonth, toMonth);
+		return getDAO().findByNickNameAndMonth(nickName, fromMonth, toMonth);
 	}
 
 	public List<ShareNote> findByNickNameAndDate(String nickName, String date) {
-		return shareNoteRepository.findByNickNameAndDate(nickName, date);
+		return getDAO().findByNickNameAndDate(nickName, date);
+	}
+	
+	public List<ShareNote> findByNickNameAndDuringDate(String nickName, String fromDate, String toDate) {
+		return getDAO().findByNickNameAndDuringDate(nickName, fromDate, toDate);
 	}
 	
 	@Override

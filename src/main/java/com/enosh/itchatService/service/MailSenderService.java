@@ -72,6 +72,7 @@ public class MailSenderService{
 	        		helper.addAttachment(attachment.getName(), attachment);
 				}
 	        }
+	        System.out.println("send email to " + mailEntity.getTo() + "......");
 	        mailSender.send(message);
 	    } catch (MessagingException e) {
 	    	e.printStackTrace();

@@ -7,14 +7,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.enosh.itchatService.common.model.MailEntity;
 import com.enosh.itchatService.config.MailSenderConfig;
+import com.enosh.itchatService.config.MailTemplates;
 import com.enosh.itchatService.config.PdfConfig;
 import com.enosh.itchatService.dispatcher.KeyMethodMapping;
 import com.enosh.itchatService.dispatcher.ThreadLocalUtils;
@@ -47,22 +51,46 @@ public class EBookGeneraterService {
     @Autowired MailSenderConfig mailSenderConfig;
     @Autowired NoteTypeService noteTypeService;
     @Autowired NoteService noteService;
+    @Autowired MailTemplates mailTemplates;
     
-    public File createPdf(String nickName, String fromMonth, String toMonth) {
+    public File createPdfForShareNote(String nickName, String fromMonth, String toMonth) {
     	List<ShareNote> shareNotes = shareNoteService.findByNickNameAndMonth(nickName, fromMonth, toMonth);
     	if(shareNotes == null || shareNotes.size() <=0) return null;
 		String monthStr = "";
 		if (fromMonth.trim().equals(toMonth.trim())) {
 			monthStr = fromMonth;
 		} else {
-			monthStr = fromMonth + " - " + toMonth;
+			monthStr = fromMonth + " -- " + toMonth;
 		}
     	String dir = pdfConfig.getDirectoryPath() + monthStr + "_" + nickName + ".pdf";
-    	File file = new File(dir);
+    	
+    	String title = pdfConfig.getShareNoteTitle() + "(" + monthStr + " " + nickName + ")";
+        return createPdfForShareNote(shareNotes, dir, title);
+    }
+    
+    public File createPdfForShareNoteDuringDate(String nickName, String fromDate, String toDate) {
+    	List<ShareNote> shareNotes = shareNoteService.findByNickNameAndDuringDate(nickName, fromDate, toDate);
+    	if(shareNotes == null || shareNotes.size() <=0) return null;
+		String dateStr = "";
+		if (fromDate.trim().equals(toDate.trim())) {
+			dateStr = fromDate;
+		} else {
+			dateStr = fromDate + " - " + toDate;
+		}
+    	String dir = pdfConfig.getDirectoryPath() + dateStr + "_" + nickName + ".pdf";
+    	
+    	String title = pdfConfig.getShareNoteTitle() + "(" + dateStr + " " + nickName + ")";
+    	
+    	return createPdfForShareNote(shareNotes, dir, title);
+    }
+    
+    public File createPdfForShareNote(List<ShareNote> shareNotes, String filePath, String title) {
+    	if(shareNotes == null || shareNotes.size() <=0) return null;
+    	File file = new File(filePath);
         file.getParentFile().mkdirs();
         Document document = new Document();
         try {
-			PdfWriter.getInstance(document, new FileOutputStream(dir));
+			PdfWriter.getInstance(document, new FileOutputStream(filePath));
 			document.open();
 	        
 	        CustomDashedLineSeparator separator = new CustomDashedLineSeparator(5f, 2.5f);
@@ -72,7 +100,6 @@ public class EBookGeneraterService {
 	        Chunk linebreak = new Chunk(separator);
 	        
 	        //title
-	        String title = pdfConfig.getShareNoteTitle() + "(" + monthStr + " " + nickName + ")";
 	        Paragraph titleParagrah = new Paragraph(title, ItextFonts.SHARE_NOTE_TITLE_FONT);
 	        titleParagrah.setAlignment(Paragraph.ALIGN_CENTER);
 	        Chapter chapter = new Chapter(titleParagrah, 1);
@@ -98,9 +125,8 @@ public class EBookGeneraterService {
 		}
 		return file;
     }
-    
-    public File createPdf(User user, String fromMonth, String toMonth) {
-    	return createPdf(user.getUsername(), fromMonth, toMonth);
+    public File genereatePdfForShareNote(User user, String fromMonth, String toMonth) {
+    	return createPdfForShareNote(user.getUsername(), fromMonth, toMonth);
     }
     
     public void createPdfForNote(Document document, User user, NoteType noteType) {
@@ -167,7 +193,7 @@ public class EBookGeneraterService {
     	
     	String month = DateTimeUtils.toStr(DateTimeUtils.getLastMonthTheDate(), DateTimeUtils.YEAR_MONTH_MASK);
     	for (User user : userList) {
-    		File file = createPdf(user, month, month);
+    		File file = genereatePdfForShareNote(user, month, month);
     		if(file != null && file.exists()) {
     			String content = "";
     			String subject = user.getUsername() + " " + month + mailSenderConfig.getSubjectPdf();
@@ -176,16 +202,29 @@ public class EBookGeneraterService {
 		}
     }
     
-	@Scheduled(cron = "0 30 7 ? * 7")
-	public void batchGenerateNote() {
-		Iterable<User> users = userService.findAll();
+    public void batchGenerateShareNoteByWeek(String fromDate, String toDate) {
+		System.out.println("Start generate weekly share note and email for all...");
+    	Iterable<User> users = userService.findAll();
     	List<User> userList = new ArrayList<User>();
     	for (User user : users) {
-    		List<NoteType> noteTypes = noteTypeService.findByUserAndCompletedAndGenereated(user, true, false);
 			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
 		}
-	}
-	
+    	
+    	for (User user : userList) {
+    		File file = createPdfForShareNoteDuringDate(user.getUsername(), fromDate, toDate);
+    		if(file != null && file.exists()) {
+    			MailEntity mailEntity = new MailEntity(user.getPrimaryEmail(), mailTemplates.getShareNoteWeeklyGeneration());
+    			Map<String, String> map = new HashMap<String, String>();
+    			map.put("username", user.getUsername());
+    			map.put("fromDate", fromDate);
+    			map.put("toDate", toDate);
+    			mailEntity.setMap(map);
+    			mailEntity.addAttachments(file);
+    			mailSenderService.sendEmail(mailEntity);
+    		}
+		}
+    }
+    
 	@KeyMethodMapping("key.to.method.generate-personal-note")
 	public File generateNote(String books) {
 		
@@ -220,6 +259,14 @@ public class EBookGeneraterService {
     		}
 		}
 		
+		if(file != null) {
+			MailEntity mailEntity = new MailEntity(user.getPrimaryEmail(), mailTemplates.getNoteGeneration());
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("username", user.getUsername());
+			mailEntity.setMap(map);
+			mailEntity.addAttachments(file);
+			mailSenderService.sendEmail(mailEntity);
+		}
 		return file;
 	}
 	
@@ -234,7 +281,7 @@ public class EBookGeneraterService {
 		}
     	
     	for (User user : userList) {
-    		File file = createPdf(user, fromMonth, toMonth);
+    		File file = genereatePdfForShareNote(user, fromMonth, toMonth);
     		if(file != null && file.exists()) {
     			String content = "Please don't reply, thanks";
     			String subject = getSubject(user, fromMonth, toMonth);
@@ -243,12 +290,32 @@ public class EBookGeneraterService {
 		}
 	}
 	
+//	@KeyMethodMapping("key.to.method.generate-share-note-for-all")
+//	public void generateShareNoteForAllDuring(String fromDate, String toDate) {
+//		System.out.println("Trigger by email. Start generate shareNote and email for all...");
+//    	Iterable<User> users = userService.findAll();
+//    	List<User> userList = new ArrayList<User>();
+//    	
+//    	for (User user : users) {
+//			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
+//		}
+//    	
+//    	for (User user : userList) {
+//    		File file = createPdf(user, fromMonth, toMonth);
+//    		if(file != null && file.exists()) {
+//    			String content = "Please don't reply, thanks";
+//    			String subject = getSubject(user, fromMonth, toMonth);
+//    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
+//    		}
+//		}
+//	}
+	
 	@KeyMethodMapping("key.to.method.generate-share-note-for-one")
 	public void generateShareNoteForOne(String userName, String fromMonth, String toMonth) {
 		System.out.println("Trigger by email. Start generate shareNote for..." + userName);
     	User user = userService.findByUsername(userName);
     	if(user != null && !StringUtils.isEmpty(user.getPrimaryEmail())) {
-    		File file = createPdf(user, fromMonth, toMonth);
+    		File file = genereatePdfForShareNote(user, fromMonth, toMonth);
     		if(file != null && file.exists()) {
     			String content = "Please don't reply, thanks";
     			String subject = getSubject(user, fromMonth, toMonth);
@@ -262,7 +329,7 @@ public class EBookGeneraterService {
     	User user = ThreadLocalUtils.getCurrentUser();
     	System.out.println("Trigger by email. Start generate personal shareNote for..." + user.getUsername());
     	if(user != null && StringUtils.isEmpty(user.getPrimaryEmail())) {
-    		File file = createPdf(user, fromMonth, toMonth);
+    		File file = genereatePdfForShareNote(user, fromMonth, toMonth);
     		if(file != null && file.exists()) {
     			String content = "Please don't reply, thanks";
     			String subject = getSubject(user, fromMonth, toMonth);

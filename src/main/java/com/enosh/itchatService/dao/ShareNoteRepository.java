@@ -19,4 +19,7 @@ public interface ShareNoteRepository extends AbsRepository<ShareNote>{
 	@Query("select s from ShareNote s where nickName=?1 and to_char(creationDate,'YYYY-MM-DD')=?2")
 	public List<ShareNote> findByNickNameAndDate(String nickName, String date);
 	
+	@Query("select s from ShareNote s where nickName=?1 and to_char(creationDate,'YYYYMMDD')>=?2 and to_char(creationDate,'YYYYMMDD')<=?3 order by to_char(creationDate,'YYYYMMDD') asc")
+	public List<ShareNote> findByNickNameAndDuringDate(String nickName, String fromDate, String toDate);
+	
 }

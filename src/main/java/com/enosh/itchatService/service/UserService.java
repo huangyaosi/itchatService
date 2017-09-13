@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.enosh.itchatService.common.model.MailEntity;
 import com.enosh.itchatService.config.MailReceiverConfig;
 import com.enosh.itchatService.dao.UserRepository;
 import com.enosh.itchatService.dispatcher.KeyMethodMapping;
@@ -16,6 +17,7 @@ public class UserService extends AbsService<User>{
 
 	@Autowired UserRepository userRepository;
 	@Autowired MailReceiverConfig mailReceiverConfig;
+	@Autowired MailSenderService mailSenderService;
 	
 	@Override
 	public UserRepository getDAO() {
@@ -71,5 +73,13 @@ public class UserService extends AbsService<User>{
 		return "Create user successfully for " + userName;
 	}
 	
-	
+	@KeyMethodMapping("key.to.method.update-email")
+	public void updateEmail(String email) {
+		User user = ThreadLocalUtils.getCurrentUser();
+		String oldEmail = user.getPrimaryEmail();
+		user.setPrimaryEmail(email);
+		user.addEmail(oldEmail);
+		save(user);
+		mailSenderService.sendEmail(new MailEntity(oldEmail,"Update new email succeed", "Update new email succeed, now you can use you new email " + email));
+	}
 }
