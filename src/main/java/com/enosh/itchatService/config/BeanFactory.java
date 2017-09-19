@@ -1,11 +1,14 @@
 package com.enosh.itchatService.config;
 
-import java.util.Locale;
+import java.io.IOException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.enosh.itchatService.App;
+import com.enosh.itchatService.itext.pdf.ItextFonts;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.BaseFont;
 
 import freemarker.template.TemplateExceptionHandler;
 
@@ -20,5 +23,18 @@ public class BeanFactory {
 		configuration.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
 		return configuration;
 	}
+
+//	@Bean("itextFonts")
+//	public ItextFonts getItextFonts() {
+//		ItextFonts itextFonts = null;
+//		try {
+//			BaseFont bf = BaseFont.createFont(System.getProperty("itext.font.path"), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+//		} catch (DocumentException e) {
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return itextFonts;
+//	}
 
 }
