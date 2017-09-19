@@ -234,7 +234,7 @@ public class EBookGeneraterService {
 		if(StringUtils.isEmpty(books)) {
 			noteTypes = noteTypeService.findByUser(user);
 		} else {
-			String[] tagArr = books.split(",");
+			String[] tagArr = books.split(" ");
 			List<String> tagList =  new ArrayList<String>(Arrays.asList(tagArr));
 			noteTypes = noteTypeService.findByUserAndEqTagOrAliasIn(user, tagList);
 		}
