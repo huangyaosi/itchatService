@@ -290,26 +290,6 @@ public class EBookGeneraterService {
 		}
 	}
 	
-//	@KeyMethodMapping("key.to.method.generate-share-note-for-all")
-//	public void generateShareNoteForAllDuring(String fromDate, String toDate) {
-//		System.out.println("Trigger by email. Start generate shareNote and email for all...");
-//    	Iterable<User> users = userService.findAll();
-//    	List<User> userList = new ArrayList<User>();
-//    	
-//    	for (User user : users) {
-//			if(!StringUtils.isEmpty(user.getPrimaryEmail())) userList.add(user);
-//		}
-//    	
-//    	for (User user : userList) {
-//    		File file = createPdf(user, fromMonth, toMonth);
-//    		if(file != null && file.exists()) {
-//    			String content = "Please don't reply, thanks";
-//    			String subject = getSubject(user, fromMonth, toMonth);
-//    			mailSenderService.sendEmailWithAttachment(user.getPrimaryEmail(), subject, content, file);
-//    		}
-//		}
-//	}
-	
 	@KeyMethodMapping("key.to.method.generate-share-note-for-one")
 	public void generateShareNoteForOne(String userName, String fromMonth, String toMonth) {
 		System.out.println("Trigger by email. Start generate shareNote for..." + userName);
@@ -328,7 +308,7 @@ public class EBookGeneraterService {
 	public void generatePersonalShareNote(String fromMonth, String toMonth) {
     	User user = ThreadLocalUtils.getCurrentUser();
     	System.out.println("Trigger by email. Start generate personal shareNote for..." + user.getUsername());
-    	if(user != null && StringUtils.isEmpty(user.getPrimaryEmail())) {
+    	if(user != null && !StringUtils.isEmpty(user.getPrimaryEmail())) {
     		File file = genereatePdfForShareNote(user, fromMonth, toMonth);
     		if(file != null && file.exists()) {
     			String content = "Please don't reply, thanks";
