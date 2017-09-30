@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.enosh.itchatService.common.model.MailEntity;
+import com.enosh.itchatService.common.MailEntity;
 import com.enosh.itchatService.config.MailSenderConfig;
 import com.enosh.itchatService.config.MailTemplates;
 import com.enosh.itchatService.config.PdfConfig;

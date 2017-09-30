@@ -14,16 +14,21 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import com.enosh.itchatService.common.MailMessage;
+import com.enosh.itchatService.common.MessageFilter;
+import com.enosh.itchatService.common.MessageFilterChain;
 import com.enosh.itchatService.service.NoteService;
 import com.enosh.itchatService.service.ShareNoteService;
 import com.enosh.itchatService.utils.Strings;
 
 @Configuration("dispacher")
 @PropertySource("classpath:key-method.properties")
-public class KeyToMethodDispatch {
+@Order(value=3)
+public class KeyToMethodDispatch implements MessageFilter{
 	
 	@Autowired private ApplicationContextProvider applicationContextProvider;
 	@Autowired private Environment env;
@@ -90,5 +95,10 @@ public class KeyToMethodDispatch {
 		}
 		
 		shareNoteService.createShareNote();
+	}
+
+	@Override
+	public void doFilter(MailMessage msg, MessageFilterChain filterChain) {
+		dispatchRequest(msg.getMethodKey(), msg.getArgs());
 	}
 }

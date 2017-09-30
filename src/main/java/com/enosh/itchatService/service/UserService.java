@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.enosh.itchatService.common.model.MailEntity;
+import com.enosh.itchatService.common.MailEntity;
 import com.enosh.itchatService.config.MailReceiverConfig;
 import com.enosh.itchatService.dao.UserRepository;
 import com.enosh.itchatService.dispatcher.KeyMethodMapping;

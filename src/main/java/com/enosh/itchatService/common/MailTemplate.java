@@ -1,4 +1,4 @@
-package com.enosh.itchatService.common.model;
+package com.enosh.itchatService.common;
 
 public class MailTemplate {
 	public String subject;

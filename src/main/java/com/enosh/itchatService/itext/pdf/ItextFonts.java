@@ -9,6 +9,7 @@ public class ItextFonts {
 	static BaseFont bf = null;
 	static {
 		try {
+			System.out.println("font path : " + System.getProperty("itext.font.path"));
 			bf = BaseFont.createFont(System.getProperty("itext.font.path"), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
 		} catch (DocumentException e) {
 			e.printStackTrace();

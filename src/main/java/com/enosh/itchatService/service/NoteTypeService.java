@@ -8,7 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.enosh.itchatService.common.model.MailEntity;
+import com.enosh.itchatService.common.MailEntity;
 import com.enosh.itchatService.config.MailTemplates;
 import com.enosh.itchatService.dao.NoteTypeRepository;
 import com.enosh.itchatService.dispatcher.KeyMethodMapping;

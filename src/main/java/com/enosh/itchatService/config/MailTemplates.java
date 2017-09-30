@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import com.enosh.itchatService.common.model.MailTemplate;
+import com.enosh.itchatService.common.MailTemplate;
 
 @Configuration
 @PropertySource("classpath:mail-templates.properties")

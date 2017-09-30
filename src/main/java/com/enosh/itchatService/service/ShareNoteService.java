@@ -54,7 +54,7 @@ public class ShareNoteService extends AbsService<ShareNote>{
 	
 	public void createShareNote() {
 		User user = ThreadLocalUtils.getCurrentUser();
-		Date sendDate = ThreadLocalUtils.getSendDate();
+		Date sendDate = ThreadLocalUtils.getMsgSendDate();
 		String text = ThreadLocalUtils.getMailContent();
 		if(!Strings.isEmpty(text)) saveNote(text, sendDate, user);
 	}

@@ -1,4 +1,4 @@
-package com.enosh.itchatService.common.model;
+package com.enosh.itchatService.common;
 
 import java.io.File;
 import java.util.ArrayList;

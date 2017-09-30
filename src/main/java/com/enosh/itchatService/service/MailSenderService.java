@@ -11,8 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.enosh.itchatService.common.model.MailEntity;
-import com.enosh.itchatService.common.model.MailTemplate;
+import com.enosh.itchatService.common.MailEntity;
+import com.enosh.itchatService.common.MailTemplate;
 import com.enosh.itchatService.config.MailSenderConfig;
 import com.enosh.itchatService.utils.Strings;
 

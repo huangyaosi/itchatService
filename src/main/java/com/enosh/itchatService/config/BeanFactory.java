@@ -1,19 +1,28 @@
 package com.enosh.itchatService.config;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.enosh.itchatService.App;
-import com.enosh.itchatService.itext.pdf.ItextFonts;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.BaseFont;
+import com.enosh.itchatService.common.MessageFilter;
+import com.enosh.itchatService.common.concurrency.ActiveQueue;
+import com.enosh.itchatService.service.EmailReceiverService;
 
 import freemarker.template.TemplateExceptionHandler;
 
 @Configuration
 public class BeanFactory {
+	@Autowired private ApplicationContext context;
 	
 	@Bean("freemarkerConfig")
 	public freemarker.template.Configuration getFreeMakerConfiguration() {
@@ -24,17 +33,20 @@ public class BeanFactory {
 		return configuration;
 	}
 
-//	@Bean("itextFonts")
-//	public ItextFonts getItextFonts() {
-//		ItextFonts itextFonts = null;
-//		try {
-//			BaseFont bf = BaseFont.createFont(System.getProperty("itext.font.path"), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-//		} catch (DocumentException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return itextFonts;
-//	}
-
+	@Bean("threadPool")
+	public ExecutorService getThreadPool() {
+		int corePoolSize = Runtime.getRuntime().availableProcessors();
+		BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<Runnable>(200);
+		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(corePoolSize+1, corePoolSize+2, 3000, TimeUnit.MILLISECONDS, workQueue);
+		threadPool.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+		return threadPool;
+	}
+	
+	@Bean("messageQueue")
+	public ActiveQueue getMessageQueue() {
+		ActiveQueue queue = new ActiveQueue(EmailReceiverService.createMessageProcesser(), 1);
+		queue.setExecutor(getThreadPool());
+		return queue;
+	}
+	
 }
