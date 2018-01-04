@@ -89,11 +89,11 @@ public class KeyToMethodDispatch implements MessageFilter{
 				if(methodWrapper != null) {
 					methodWrapper.invoke(args);
 					return;
-				} 
-				key = "";
+				} else {
+					shareNoteService.createShareNote();
+				}
 			}
 		}
-		
 		shareNoteService.createShareNote();
 	}
 

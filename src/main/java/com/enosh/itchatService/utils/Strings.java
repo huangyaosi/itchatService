@@ -3,7 +3,7 @@ package com.enosh.itchatService.utils;
 public class Strings {
 	public static final String COLON_DELIMITER = ":";
 	public static final String SEMICOLON_DELIMITER = ":"; 
-	public static final String COMMA_DELIMITER = ":"; 
+	public static final String COMMA_DELIMITER = ":";
 	
 	public static boolean isEmpty(String str) {
 		return str !=null ? str.trim().length() == 0 : true;
@@ -61,6 +61,11 @@ public class Strings {
 		if(!isEmpty(sb.toString())) {
 			sb.append(delimiter).append(str);
 		}
+	}
+	
+	public static String toText(String html) {
+		return html.replaceAll("\\<br\\>", "\n")
+				.replaceAll("\\<[^(\\u4e00-\\u9fa5)]*?\\>", "");
 	}
 	
 	public static void main(String args[]) {

@@ -87,7 +87,8 @@ public class ShareNoteService extends AbsService<ShareNote>{
 		text = text.trim();
 		for (ShareNote shareNote : shareNotes) {
 			double percent = Strings.similarity(text, shareNote.getText());
-			System.out.println(percent);
+			System.out.println("user : " + text.substring(1, 20));
+			System.out.println("similar percent : " + percent);
 			if(percent >= 0.8d){
 				alreadyExist = true;
 				shareNote.setText(text);

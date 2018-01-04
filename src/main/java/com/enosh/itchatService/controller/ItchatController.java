@@ -63,7 +63,10 @@ public class ItchatController {
 	@RequestMapping("/createUser")
     public String createUser(@RequestParam(required = true)String userName,
     		@RequestParam(required = false)String email) {
+		User user = userService.findByUsername(userName);
+		if(user == null) return null;
 		
+		ThreadLocalUtils.init(user, new Date(), "");
 		return userService.createUser(userName, email);
     }
 	

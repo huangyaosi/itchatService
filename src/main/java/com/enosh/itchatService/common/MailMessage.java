@@ -95,7 +95,7 @@ public class MailMessage {
 			e.printStackTrace();
 		}
 		setRead(true);
-		return messageContent;
+		return Strings.toText(messageContent);
 	}
 	
 	private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
@@ -103,7 +103,7 @@ public class MailMessage {
 		int count = mimeMultipart.getCount();
 		for (int i = 0; i < count; i++) {
 			BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-			if (bodyPart.isMimeType("text/plain")) {
+			if (bodyPart.isMimeType("text/plain") || bodyPart.isMimeType("text/html")) {
 				result = (String) bodyPart.getContent();
 				if (!Strings.isEmpty(result))
 					break;

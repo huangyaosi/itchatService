@@ -73,7 +73,7 @@ public class EmailReceiverService {
 			
 			Arrays.sort(messages, getdateComparator());
 			messageHander.process(messages);
-//			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			// disconnect
 			folderInbox.close(false);
 			store.close();
@@ -117,6 +117,44 @@ public class EmailReceiverService {
 	}
 	
 	public static void main(String[] args) {
+		Properties properties = new Properties();
+		String protocal = "imap";
+		String host = "imap.sina.com";
+		String port = "143";
+		String username = "XXX";
+		String password = "XXX";
+		properties.put(String.format("mail.%s.host", protocal), host);
+		properties.put(String.format("mail.%s.port", protocal), port);
 
+		Session session = Session.getDefaultInstance(properties);
+		try {
+			// connects to the message store
+			Store store = session.getStore(protocal);
+			store.connect(username, password);
+
+			// opens the inbox folder
+			Folder folderInbox = store.getFolder("INBOX");
+			folderInbox.open(Folder.READ_WRITE);
+
+			// fetches new messages from server
+			// Message[] messages = folderInbox.getMessages();
+			Message[] messages = folderInbox.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+			for (Message message : messages) {
+				MailMessage msg = new MailMessage(message);
+				if("XXX".equals(msg.getFromUserName())) {
+					System.out.println("contesnt : " + msg.getContent());
+				}
+			}
+//			folderInbox.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+			// disconnect
+			folderInbox.close(false);
+			store.close();
+		} catch (NoSuchProviderException ex) {
+			System.out.println("No provider for protocol: " );
+			ex.printStackTrace();
+		} catch (MessagingException ex) {
+			System.out.println("Could not connect to the message store");
+			ex.printStackTrace();
+		}
    }
 }
