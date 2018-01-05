@@ -69,7 +69,7 @@ public class UserService extends AbsService<User>{
 			}
 		}
 		save(user);
-		
+		mailSenderService.sendEmail(new MailEntity(user.getPrimaryEmail(),"Creat user succeed!", "Create user " + user.getUsername() + " succeed, welcome to use it. "));
 		return "Create user successfully for " + userName;
 	}
 	

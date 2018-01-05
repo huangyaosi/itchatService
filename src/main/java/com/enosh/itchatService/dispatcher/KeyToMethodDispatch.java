@@ -81,18 +81,18 @@ public class KeyToMethodDispatch implements MessageFilter{
 
 	public void dispatchRequest(String key, Object[] args) {
 		if(!Strings.isEmpty(key)) {
+			//if it is a common note
 			if(args == null) {
 				boolean succeed = noteService.createNote(key);
 				if(succeed) return;
-			} else {
-				MethodWrapper methodWrapper = keyToMethodMap.get(key);
-				if(methodWrapper != null) {
-					methodWrapper.invoke(args);
-					return;
-				} else {
-					shareNoteService.createShareNote();
-				}
+			} 
+			//if it is a command
+			MethodWrapper methodWrapper = keyToMethodMap.get(key);
+			if(methodWrapper != null) {
+				methodWrapper.invoke(args);
+				return;
 			}
+			key = "";
 		}
 		shareNoteService.createShareNote();
 	}

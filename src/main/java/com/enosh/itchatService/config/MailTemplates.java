@@ -15,6 +15,7 @@ public class MailTemplates {
 	private final MailTemplate noteTypeCreateSucceed = new MailTemplate();
 	private final MailTemplate shareNoteWeeklyGeneration = new MailTemplate();
 	private final MailTemplate noteGeneration = new MailTemplate();
+	private final MailTemplate noteTypeList = new MailTemplate();
 	
 	public MailTemplate getNoteTypeCreateFailed() {
 		return noteTypeCreateFailed;
@@ -31,5 +32,8 @@ public class MailTemplates {
 	public MailTemplate getNoteGeneration() {
 		return noteGeneration;
 	}
-	
+
+	public MailTemplate getNoteTypeList() {
+		return noteTypeList;
+	}
 }

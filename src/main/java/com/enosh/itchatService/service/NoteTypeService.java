@@ -66,6 +66,29 @@ public class NoteTypeService extends AbsService<NoteType>{
 		}
 		
 	}
+	
+	@KeyMethodMapping("key.to.method.get-existed-note-type")
+	public void getExisted() {
+		User user = ThreadLocalUtils.getCurrentUser();
+		
+		Map<String, String> map = new HashMap<String, String>();
+		MailEntity mailEntity = new MailEntity(user.getPrimaryEmail());
+		mailEntity.setMap(map);
+		
+		mailEntity.setTemplate(mailTemplates.getNoteTypeList());
+		List<NoteType> noteTypes = getDAO().findByUser(user);
+		if(noteTypes != null && noteTypes.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			for (NoteType n : noteTypes) {
+				sb.append(n.getTag()).append(Strings.COLON_DELIMITER).append(n.getAlias()).append("\r\n");
+			}
+			
+			map.put("username", user.getUsername());
+			map.put("noteTypes", sb.toString());
+			mailSenderService.sendEmail(mailEntity);
+		}
+		
+	}
 	public NoteType findByTagOrAlias(User user, String tag, String alias) {
 		return getDAO().findByTagOrAlias(user, tag, alias);
 	}

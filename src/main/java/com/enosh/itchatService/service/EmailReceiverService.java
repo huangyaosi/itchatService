@@ -48,8 +48,8 @@ public class EmailReceiverService {
 	
 	private Comparator dateComparator;
 	
-	@Scheduled(cron = "0 */20 * * * *")
-//	@Scheduled(cron = "*/40 * * * * *")
+//	@Scheduled(cron = "0 */20 * * * *")
+	@Scheduled(cron = "*/40 * * * * *")
 	public void pollNewEmails() {
 		System.out.println(DateTimeUtils.toStr(new Date(), DateTimeUtils.DATE_TIME_MASK) + "-------start search new email...");
 		Properties properties = new Properties();
