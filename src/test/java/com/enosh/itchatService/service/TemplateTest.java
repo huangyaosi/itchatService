@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.enosh.note.common.service.FreeMakerTemplateService;
+import com.enosh.note.common.service.MailSenderService;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest({"java.net.preferIPv4Stack=true"})
 public class TemplateTest {

@@ -13,11 +13,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.enosh.itchatService.model.Note;
-import com.enosh.itchatService.model.NoteType;
-import com.enosh.itchatService.model.ShareNote;
-import com.enosh.itchatService.model.User;
-import com.enosh.itchatService.utils.DateTimeUtils;
+import com.enosh.note.model.Note;
+import com.enosh.note.model.NoteType;
+import com.enosh.note.model.ShareNote;
+import com.enosh.note.model.User;
+import com.enosh.note.model.dao.NoteRepository;
+import com.enosh.note.model.dao.ShareNoteRepository;
+import com.enosh.note.model.dao.UserRepository;
+import com.enosh.note.utils.DateTimeUtils;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

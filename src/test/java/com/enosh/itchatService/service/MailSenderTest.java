@@ -11,7 +11,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.enosh.itchatService.config.MailSenderConfig;
+import com.enosh.note.common.service.MailSenderService;
+import com.enosh.note.config.bean.MailSenderConfig;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest

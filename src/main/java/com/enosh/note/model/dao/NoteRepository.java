@@ -1,0 +1,24 @@
+package com.enosh.note.model.dao;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.enosh.note.model.Note;
+import com.enosh.note.model.NoteType;
+import com.enosh.note.model.User;
+
+@Repository
+public interface NoteRepository extends AbsRepository<Note>{
+	
+	public List<Note> findByNoteType(NoteType noteType);
+	
+	public List<Note> findByUser(User user);
+	
+	public List<Note> findByUserAndNoteTypeOrderByCreationDate(User user, NoteType noteType);
+	
+	@Query("select n from Note n where n.user =?1 and to_char(n.creationDate, 'YYYYMMDD')=?2")
+	public List<Note> findByCreationDate(User user, String creationDate);
+	
+}
