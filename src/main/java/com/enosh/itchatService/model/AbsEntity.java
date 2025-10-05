@@ -3,13 +3,7 @@ package com.enosh.itchatService.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 @MappedSuperclass

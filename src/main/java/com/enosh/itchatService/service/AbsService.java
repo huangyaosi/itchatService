@@ -14,7 +14,7 @@ public abstract class AbsService<T> {
 	}
 	
 	public void get(String id) {
-		getDAO().findOne(id);
+		getDAO().findById(id);
 	}
 	
 	public Iterable<T> findAll() {

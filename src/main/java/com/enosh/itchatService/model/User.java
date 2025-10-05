@@ -1,9 +1,8 @@
 package com.enosh.itchatService.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-
 import com.enosh.itchatService.utils.Strings;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")

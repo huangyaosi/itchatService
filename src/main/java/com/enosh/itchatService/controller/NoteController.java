@@ -22,7 +22,7 @@ import com.enosh.itchatService.service.ShareNoteService;
 import com.enosh.itchatService.service.UserService;
 
 @RestController
-public class ItchatController {
+public class NoteController {
 	
 	@Autowired private ShareNoteService shareNoteService;
 	@Autowired private EBookGeneraterService eBookGeneraterService;
